@@ -1,0 +1,219 @@
+body {
+    margin: 0 auto;
+    line-height: 1.2em;
+    max-width: 900px;
+    min-height:100vh;
+    overflow-x: hidden;
+}
+
+body > * {
+    margin: 0 10px;
+}
+
+@media screen and (max-width: 575px) {
+    header, #header-spacer {
+        height:9em;
+    }
+    .logo, header .menu {
+        float: none;
+    }
+    body, html {
+        scroll-padding-top: 10em;
+    }
+}
+
+@media screen and (min-width: 576px) {
+    header, #header-spacer {
+        height:5em;
+    }
+    .logo {
+        float: left;
+    }
+    header .menu {
+        float: right;
+    }
+    body, html {
+        scroll-padding-top: 6em;
+    }
+}
+
+header, #header-spacer {
+    margin: 0 0 8px;
+    padding: 0;
+    width: 100%;
+}
+
+header {
+    background-image: linear-gradient(#ace, #def 30%, #def 60%, #fff);
+    position: fixed;
+    top: 0;
+    left:0;
+}
+
+footer {
+    width: 100vw;
+    position: absolute;
+    left: 0;
+    margin: 0;
+    background-image: linear-gradient(rgba(255, 255, 255, 0), rgba(200, 230, 255, 0.5) 20%, rgba(200, 230, 255, 0.5) 80%, rgba(255, 255, 255, 0));
+}
+
+footer .menu {
+    text-align:center;
+    width: 100%;
+}
+
+#footer-line {
+    position: fixed;
+    bottom:0;
+    left: 0;
+    margin: 0;
+    height: 3em;
+    background-image: linear-gradient(rgba(255, 255, 255, 0), rgba(200, 230, 255, 1));
+    width: 100%;
+    z-index:-1;
+}
+
+.logo {
+    height: 100%;
+    height: 5em;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.menu {
+    margin: 1.5em 1.5em 1.5em 0;
+    display: inline-block;
+}
+
+footer .menu {
+    margin-right: 0;
+}
+
+.menu a {
+    text-decoration: none;
+}
+
+.sm_icon {
+    height: 1.5em;
+    margin-bottom: -0.4em;
+}
+
+
+#home div {
+    padding: 5px 10px 5px 5px;
+    white-space: pre-line;
+}
+
+section div {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+section.accordion div {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.accordion .preamble {
+    padding: 5px 10px 5px 5px;
+    display: inline-block;
+    white-space: pre-line;
+}
+
+
+.accordion div {
+    cursor: pointer;
+}
+
+h1,  h2,  h3,  h4,  h5 {
+    margin: 0;
+    padding: 5px 15px;
+}
+
+.havejs .accordion div.open h1:after, .havejs  .accordion div.open h2:after, .havejs  .accordion div.open h3:after, .havejs  .accordion div.open h4:after, .havejs  .accordion div.open h5:after {
+    content: "\2212";
+}
+
+.havejs .accordion div h1:after, .havejs  .accordion div h2:after, .havejs  .accordion div h3:after, .havejs  .accordion div h4:after, .havejs  .accordion div h5:after {
+    content: "\002B";
+    font-weight: bold;
+    float: right;
+    margin-left: 5px;
+}
+
+.accordion p {
+    transition: all 0.5s ease;
+
+    white-space: pre-line;
+    overflow: hidden;
+    background-color: #f0faff;
+    margin: 0;
+    padding: 0 5px;
+}
+
+.havejs .accordion p {
+    max-height: 0;
+}
+
+.havejs .accordion.preview p {
+    max-height: 1.2em;
+}
+
+.accordion p, .accordion .preamble, section#home div {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.accordion.preview p {
+/*     max-height: 1.2em; */
+    text-overflow: ellipsis;
+    border-bottom: 5px solid #f0faff;
+}
+
+.accordion div.open p, .havejs .accordion div.open p {
+    max-height: 50em;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.accordion > div {
+    background-color: #ace;
+    border: 1px solid #ace;
+}
+
+.accordion > div, .accordion .preamble {
+    margin-bottom: 10px;
+}
+
+.accordion div.open {
+    margin-bottom: 15px;
+}
+
+.accordion > div:hover {
+    background-color: #def;
+}
+
+.accordion .header-controls {
+    font-weight: initial;
+    font-size: smaller;
+    float: right;
+}
+
+.accordion .header-controls span {
+    cursor: pointer;
+}
+
+
+
+section#home {
+    display: initial;
+}
+
+section {
+    display: none;
+}
+
+section:target {
+    display: initial;
+}

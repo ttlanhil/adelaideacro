@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="11cm" height="6cm" viewBox="45 25 207 111" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs/>
+  <g id="Background">
+    <line style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke-linecap: square; stroke: #666666" x1="65.4772" y1="91.8784" x2="73.781" y2="76.532"/>
+    <line style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke-linecap: square; stroke: #666666" x1="58.5652" y1="91.2434" x2="51.2348" y2="77.1628"/>
+    <ellipse style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke-linecap: square; stroke: #666666" cx="62.102" cy="36.1942" rx="3.97744" ry="3.97744"/>
+    <ellipse style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke-linecap: square; stroke: #666666" cx="62.0338" cy="77.0534" rx="3.97744" ry="3.97744"/>
+    <polyline style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke-linecap: square; stroke-linejoin: round; stroke: #666666" points="65.5376,46.7136 74.795,50.9382 70.8474,61.8228 "/>
+    <polyline style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke-linecap: square; stroke-linejoin: round; stroke: #666666" points="59.1186,46.7136 49.9888,50.9908 54.0752,62.2452 "/>
+    <text font-size="56.4444" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:Gentium Basic;font-style:normal;font-weight:normal" x="45.5684" y="120">
+      <tspan x="45.5684" y="120">A</tspan>
+    </text>
+    <text font-size="50.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="46.1642" y="80.1074">
+      <tspan x="46.1642" y="80.1074">A</tspan>
+    </text>
+    <text font-size="39.5111" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:Kinnari;font-style:normal;font-weight:normal" x="81.1516" y="80.0531">
+      <tspan x="81.1516" y="80.0531">DELAIDE</tspan>
+    </text>
+    <text font-size="25.4" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:Kinnari;font-style:normal;font-weight:normal" x="79.3906" y="120.015">
+      <tspan x="79.3906" y="120.015">CROBALANCE</tspan>
+    </text>
+  </g>
+</svg>
