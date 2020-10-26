@@ -15,6 +15,7 @@ body > * {
         height:9em;
     }
     .logo, header .menu {
+        margin: 0 15px;
         float: none;
     }
     body, html {
@@ -31,6 +32,7 @@ body > * {
     }
     header .menu {
         float: right;
+        margin-right: 40px;
     }
     body, html {
         scroll-padding-top: 6em;
@@ -128,7 +130,7 @@ section.accordion div {
 
 h1,  h2,  h3,  h4,  h5 {
     margin: 0;
-    padding: 5px 15px;
+    padding: 5px 25px 5px 15px;
 }
 
 .havejs .accordion div.open h1:after, .havejs  .accordion div.open h2:after, .havejs  .accordion div.open h3:after, .havejs  .accordion div.open h4:after, .havejs  .accordion div.open h5:after {
@@ -163,6 +165,7 @@ h1,  h2,  h3,  h4,  h5 {
 .accordion p, .accordion .preamble, section#home div {
     padding-left: 15px;
     padding-right: 15px;
+    clear:both;
 }
 
 .accordion.preview p {
@@ -184,6 +187,7 @@ h1,  h2,  h3,  h4,  h5 {
 
 .accordion > div, .accordion .preamble {
     margin-bottom: 10px;
+    clear:both;
 }
 
 .accordion div.open {
