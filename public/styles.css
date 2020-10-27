@@ -2,8 +2,6 @@ body {
     margin: 0 auto;
     line-height: 1.2em;
     max-width: 900px;
-    min-height:100vh;
-    overflow-x: hidden;
 }
 
 body > * {
@@ -53,7 +51,7 @@ header {
 }
 
 footer {
-    width: 100vw;
+    width: 100%;
     position: absolute;
     left: 0;
     margin: 0;
@@ -84,7 +82,7 @@ footer .menu {
 }
 
 .menu {
-    margin: 1.5em 1.5em 1.5em 0;
+    margin: 1.5em 0;
     display: inline-block;
 }
 
@@ -211,7 +209,7 @@ h1,  h2,  h3,  h4,  h5 {
 
 
 section#home {
-    display: initial;
+    display: block;
 }
 
 section {
@@ -219,5 +217,5 @@ section {
 }
 
 section:target {
-    display: initial;
+    display: block;
 }
