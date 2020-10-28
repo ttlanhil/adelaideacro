@@ -43,5 +43,8 @@ function build_accordions() {
 
 window.onload = function() {
     build_accordions();
+    if ( ! document.location.hash ) {
+        document.location.hash = "#home";
+    }
     document.body.classList.add("havejs");
 }

@@ -208,12 +208,6 @@ h1,  h2,  h3,  h4,  h5 {
     cursor: pointer;
 }
 
-
-
-section#home {
-    display: block;
-}
-
 section {
     display: none;
 }
