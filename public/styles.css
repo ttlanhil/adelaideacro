@@ -52,7 +52,7 @@ footer {
     width: 100%;
     position: absolute;
     left: 0;
-    margin: 0;
+    margin: 10px 0 0;
     background-image: linear-gradient(rgba(255, 255, 255, 0), rgba(200, 230, 255, 0.5) 20%, rgba(200, 230, 255, 0.5) 80%, rgba(255, 255, 255, 0));
 }
 
