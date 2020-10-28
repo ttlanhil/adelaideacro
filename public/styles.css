@@ -10,11 +10,10 @@ body > * {
 
 @media screen and (max-width: 609px) {
     header, #header-spacer {
-        height:9em;
+        min-height: 9em;
     }
     .logo, header .menu {
         margin: 0 15px;
-        float: none;
     }
     body, html {
         scroll-padding-top: 10em;
@@ -23,13 +22,12 @@ body > * {
 
 @media screen and (min-width: 610px) {
     header, #header-spacer {
-        height:5em;
+        min-height: 6em;
     }
     .logo {
         float: left;
     }
     header .menu {
-        float: right;
         margin-right: 40px;
     }
     body, html {
@@ -77,17 +75,18 @@ footer .menu {
 .logo {
     height: 100%;
     height: 5em;
-    margin-left: 20px;
-    margin-right: 20px;
+    margin: 10px 20px;
 }
 
 .menu {
     margin: 1.5em 0;
-    display: inline-block;
+    right: 0;
+    position: absolute;
 }
 
 footer .menu {
     margin-right: 0;
+    position: relative;
 }
 
 .menu a {
