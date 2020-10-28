@@ -8,7 +8,7 @@ body > * {
     margin: 0 10px;
 }
 
-@media screen and (max-width: 575px) {
+@media screen and (max-width: 609px) {
     header, #header-spacer {
         height:9em;
     }
@@ -21,7 +21,7 @@ body > * {
     }
 }
 
-@media screen and (min-width: 576px) {
+@media screen and (min-width: 610px) {
     header, #header-spacer {
         height:5em;
     }
@@ -118,6 +118,9 @@ section.accordion div {
 .accordion .preamble {
     padding: 5px 10px 5px 5px;
     display: inline-block;
+}
+
+.preamble {
     white-space: pre-line;
 }
 

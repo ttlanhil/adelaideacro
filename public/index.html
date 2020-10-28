@@ -21,6 +21,7 @@
     <img alt="Logo" src="logo.svg" class="logo">
     <div class="menu">
     <a href="#schedule">Class Schedule</a> |
+    <a href="#location">Class Location</a> |
     <a href="#aboutus">About Us</a> |
     <a href="#faqs">FAQs</a> |
     <a href="#contact">Contact</a>
@@ -80,6 +81,28 @@
 
 </section>
 
+
+<section id="location">
+<div class="preamble">
+ViewPoint / Point A
+20 Gunson St,
+Adelaide SA 5000
+
+</div>
+<div style="margin:15px 0;" id="map-wrapper">
+    <a href="https://goo.gl/maps/sUjYDLQPtX1Vrcw4A">Open in Google Maps</a>
+</div>
+<script type="text/javascript">
+function load_map(){
+    document.getElementById("map-wrapper").innerHTML = '<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3271.0998022008152!2d138.60451631564402!3d-34.92903388037659!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ab0ced3a9f810f1%3A0xee378ea10f89cdec!2sPoint%20A!5e0!3m2!1sen!2sau!4v1603861345027!5m2!1sen!2sau" width="100%" height="450" frameborder="0" style="border:0;" allowfullscreen="" aria-hidden="false" tabindex="0"></iframe>';
+    return false;
+}
+document.getElementById("map-wrapper").innerHTML = '<a href="javascript:load_map();">Open Map</a>';
+</script>
+
+</section>
+
+
 <section id="aboutus">
     <h3>About Us</h3>
     <div>history, people, experience, etc
@@ -106,19 +129,6 @@
         <p>Wear comfortable clothing that you can move freely in; any sort of activewear is ideal.
         We train barefoot, however you’re welcome to wear socks or shoes during warmup/cooldown.
         Bring your own water bottles, and a towel may be handy on warmer days.</p>
-    </div>
-
-    <div>
-        <h4>When… are the sessions?</h4>
-        <p>Every Wednesday, starting at 7pm.
-        We’ll stretch and cool down by around 9pm for those who are new or need to leave, otherwise we finish by 10pm</p>
-    </div>
-
-    <div>
-        <h4>Where… are the Sessions?</h4>
-        <p>ViewPoint / Point A
-        20 Gunson St,
-        Adelaide SA 5000</p>
     </div>
 
     <div>
@@ -159,6 +169,7 @@
     <div class="menu">
     <a href="#home">Home</a> |
     <a href="#schedule">Class Schedule</a> |
+    <a href="#location">Class Location</a> |
     <a href="#aboutus">About Us</a> |
     <a href="#faqs">FAQs</a> |
     <a href="#contact">Contact</a> &nbsp;
