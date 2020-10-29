@@ -10,12 +10,13 @@ jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
 
       - name: Checks HTML5
-      uses: Cyb3r-Jak3/html5validator-action@v0.4.2
-      with:
-        root: public
+        uses: Cyb3r-Jak3/html5validator-action@v0.4.2
+        with:
+          root: public
 
       - name: Auto Minify
         uses: nizarmah/auto-minify@master
