@@ -13,15 +13,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Checks HTML5
+      - name: Run HTML5 validator
         uses: Cyb3r-Jak3/html5validator-action@v0.4.2
         with:
           root: public
 
-      - name: Auto Minify
-        uses: nizarmah/auto-minify@master
-        with:
-          directory: 'public'
+      #- name: Minify
+        #uses: nizarmah/auto-minify@master
+        #with:
+          #directory: 'public'
 
       #- run: npm ci && npm run build
       - name: Deploy to Firebase
