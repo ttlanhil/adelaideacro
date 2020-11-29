@@ -43,6 +43,7 @@ function build_accordions() {
 
 window.onload = function() {
     build_accordions();
+    document.getElementById("home").removeAttribute("style");
     if ( ! document.location.hash ) {
         document.location.hash = "#home";
     }
