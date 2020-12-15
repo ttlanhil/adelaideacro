@@ -23,7 +23,7 @@ h2 {
         scroll-padding-top: 10em;
     }
 }
-@media screen and (max-width: 350px) {
+@media screen and (max-width: 400px) {
     header, #header-spacer {
         min-height: 11em;
     }
