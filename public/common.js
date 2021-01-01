@@ -49,7 +49,14 @@ window.onload = function() {
     // allows page to still work reasonably well with JS disabled
     document.getElementById("home").removeAttribute("style");
     if ( ! document.location.hash ) {
-        document.location.hash = "#home";
+        // check page name, and if it matches a section, jump to that section (e.g. contact.html)
+        // get filename without leading paths, and without extension
+        let path = document.location.pathname.replace(/^.*\//, "").replace(/\.\w+$/, "");
+        if (document.getElementById(path)) {
+            document.location.hash = "#" + path;
+        } else {
+            document.location.hash = "#home";
+        }
     }
 
     // add havejs class to body, used for some of the CSS
