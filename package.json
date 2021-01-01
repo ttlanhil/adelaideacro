@@ -14,7 +14,7 @@
     "lint": "./node_modules/.bin/eslint .",
     "server": "firebase serve",
     "deploy": "firebase deploy --only hosting:adelaide-acrobalance",
-    "validator": "html5validator --root public --format text --show-warnings --also-check-css --also-check-svg"
+    "validator": "html5validator --root public --format text --show-warnings --also-check-css && html5validator --root public --format text --only-check-svg"
   },
   "repository": {
     "type": "git",
