@@ -1,0 +1,26 @@
+{
+  "name": "website",
+  "version": "1.0.0",
+  "description": "AdelaideAcrobalance website",
+  "main": "firebase.js",
+  "dependencies": {
+    "firebase-admin": "^9.4.2",
+    "jsonwebtoken": "^8.5.1"
+  },
+  "devDependencies": {
+    "eslint": "^7.16.0"
+  },
+  "scripts": {
+    "lint": "./node_modules/.bin/eslint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ttlanhil/adelaideacro.git"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/ttlanhil/adelaideacro/issues"
+  },
+  "homepage": "https://github.com/ttlanhil/adelaideacro#readme"
+}
