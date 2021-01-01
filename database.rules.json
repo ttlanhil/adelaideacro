@@ -1,0 +1,15 @@
+{
+    "rules": {
+        ".read": "false",
+        ".write": "false",
+        "sessions": {
+            ".read": "auth != null",
+            ".indexOn": "start"
+        },
+        "users": {
+            "$uid": {
+                ".read": "$uid === auth.uid"
+            }
+        }
+    }
+}

@@ -13,7 +13,8 @@
   "scripts": {
     "lint": "./node_modules/.bin/eslint .",
     "server": "firebase serve",
-    "deploy": "firebase deploy --only hosting:adelaide-acrobalance"
+    "deploy": "firebase deploy --only hosting:adelaide-acrobalance",
+    "deploy-database": "firebase deploy --only database"
   },
   "repository": {
     "type": "git",

@@ -1,0 +1,252 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>Adelaide Acrobalance</title>
+<link rel="shortcut icon" href="logo_AA.svg" />
+
+<link rel="stylesheet" href="styles.css" />
+
+<style>
+#video-container {position: fixed; top: 0; left: 0; height: 100%; width: 100%; margin: 0; z-index: -1;}
+#login-details {margin-bottom: 5px;}
+.session-entry {margin: 10px 0;}
+</style>
+
+<script>
+
+function logout() {
+    firebase.auth().signOut().then(function() {
+        document.getElementById("login-details").innerHTML = "";
+        document.getElementById("session-list").innerHTML = "";
+        document.getElementById('loader').style.display = "initial";
+        // Sign-out successful.
+    }).catch(function(error) {
+        console.log("logout error:", error);
+        // An error happened.
+    });
+}
+
+var authui;
+function showLogin() {
+
+    var uiConfig = {
+        callbacks: {
+            signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+                // User successfully signed in.
+                // Return type determines whether we continue the redirect automatically
+                // or whether we leave that to developer to handle.
+                return false;
+            }
+        },
+        // Will use popup for IDP Providers sign-in flow instead of the default, redirect.
+        signInFlow: 'popup',
+        signInOptions: [
+            firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+            firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+            firebase.auth.EmailAuthProvider.PROVIDER_ID,
+            firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID
+        ],
+        // Terms of service url.
+        tosUrl: '/legal.html',
+        // Privacy policy url.
+        privacyPolicyUrl: '/legal.html'
+    };
+
+    authui = authui || new firebaseui.auth.AuthUI(firebase.auth());
+
+    authui.start('#firebaseui-auth-container', uiConfig);
+}
+
+
+function formatHHMM(date) {
+    function z(n){return (n<10?'0':'') + n;}
+    var h = date.getHours();
+    return (h%12||12) + ':' + z(date.getMinutes()) + ' ' + (h<12?'AM':'PM');
+}
+
+
+function updateName() {
+    var user = firebase.auth().currentUser;
+    const newName = prompt("Enter new display name", user.displayName || "");
+    if (newName != null) {
+        user.updateProfile({
+            displayName: newName,
+        }).then( () => postLogin(user) );
+    }
+}
+
+
+function addSessionEntry([sessions, userData]) {
+    sessions = sessions.val();
+    userData = userData.val();
+    if (userData && userData.moderator) {
+        document.getElementById("login-permissions").innerHTML = "You are signed in as a moderator, you will be able to mute/remove people from meetings.";
+    } else if (userData && userData.participant) {
+        // all good, continue to session display
+    } else {
+        document.getElementById("login-permissions").innerHTML = "Thanks for signing up!<br/>We'll check for new sign-ups before each session, and you'll be able to join sessions once confirmed.<br/>If you haven't joined our sessions before, please <a href='/contact.html'>send a message</a> so we know who you are!";
+        return;
+    }
+
+    for (let sessionID in sessions){
+        const session = sessions[sessionID];
+        if (sessionID in userData.sessionTokens) {
+            const sessionEntry = document.createElement("div");
+            sessionEntry.className = "session-entry";
+
+            let meetingDisplay = `<a href="#">${session.displayName}</a>`;
+            if (session.modOnly) {
+                meetingDisplay += " (moderators only)";
+            }
+            if (session.start) {
+                const startTime = new Date(session.start*1000);
+                const openTime = new Date(session.nbf*1000);
+                meetingDisplay += `<br />${startTime.toLocaleDateString()} ${formatHHMM(startTime)}`;
+                if (session.duration) {
+                    const endTime = new Date((session.start+session.duration)*1000);
+                    meetingDisplay += ` until ${formatHHMM(endTime)}`;
+                }
+                meetingDisplay += `<br />Open to join from ${formatHHMM(openTime)} (entry will fail before then).`;
+            }
+
+            sessionEntry.innerHTML = meetingDisplay;
+
+            // wrap in closure to prevent variables all pointing to last meeting
+            sessionEntry.onclick = (function(roomName, token){
+                return () => {loadVideo(roomName, token); return false;}
+            })(session.roomName, userData.sessionTokens[sessionID]);
+            document.getElementById("session-list").appendChild(sessionEntry);
+        }
+    }
+    if (document.getElementById("session-list").innerHTML.length <= 0){
+        document.getElementById("session-list").innerHTML = "No upcoming sessions prepared - we'll announce them once they're available!";
+    }
+}
+
+
+function postLogin(user) {
+    document.getElementById('loader').style.display = "none";
+    document.getElementById("login-permissions").innerHTML = "";
+
+    let loggedInStr = ["Logged in as <em>" + (user.displayName || "New User") + "</em>"];
+    if (user.providerData && user.providerData[0]) {
+        loggedInStr.push("(via " + user.providerData[0].providerId + ")");
+    }
+    loggedInStr.push("<br/>");
+    loggedInStr.push("<a href='#' onclick='updateName(); return false;'>Update name</a>");
+    loggedInStr.push("|");
+    loggedInStr.push("<a href='#' onclick='logout(); return false;'>Logout</a>");
+    document.getElementById("login-details").innerHTML = loggedInStr.join(" ");
+
+    if (!user.displayName) {
+        document.getElementById("login-permissions").innerHTML = "Please update your name so we know who you are";
+        return;
+    }
+
+    const currentTimestamp = Date.now()/1000;
+    const sessionsReq = firebase.database().ref('/sessions').orderByChild("start").startAt(currentTimestamp).once('value');
+    const userDataReq = firebase.database().ref('/users/'+ user.uid).once('value');
+
+    Promise.all([sessionsReq, userDataReq]).then( addSessionEntry );
+}
+
+
+function checkLogin() {
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            // User is signed in, see docs for a list of available properties
+            // https://firebase.google.com/docs/reference/js/firebase.User
+            postLogin(user);
+        } else {
+            showLogin();
+        }
+    });
+}
+
+window.addEventListener('DOMContentLoaded', checkLogin, false);
+
+</script>
+
+<script src='https://8x8.vc/external_api.js' async></script>
+<script>
+
+var videoAPI;
+
+function loadVideo(roomName, jwt) {
+    // The init options as per https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-iframe
+    const parentNode = document.querySelector('#video-container');
+    const configOverwrite = {
+        // Disables all invite functions from the app (share, invite, dial out...etc)
+        disableInviteFunctions: true,
+
+        doNotStoreRoom: true,
+
+        startWithAudioMuted: true,
+
+        enableWelcomePage: false,
+    };
+    const initData = { roomName, jwt, parentNode, configOverwrite };
+
+    // Init the iframe API with the domain you've set in Branding, or 8x8.vc if you don't have one yet
+//     const api = new JitsiMeetExternalAPI("adelaideacrobalance.com.au", initData);
+    // TODO: hide sign-in page and such
+    videoAPI = new JitsiMeetExternalAPI("8x8.vc", initData);
+    document.getElementById("video-container").style.zIndex = 100;
+
+    // TODO: likewise for auth failure, time failure, etc
+    // auto-close iframe when meeting ends
+    videoAPI.on("readyToClose", () => {
+        videoAPI.dispose();
+        document.getElementById("video-container").style.zIndex = -1;
+    });
+}
+
+</script>
+
+</head>
+
+<body>
+
+<header>
+    <a href="#home">
+        <img alt="Adelaide Acrobalance Logo" src="logo.svg" class="logo" height="80" width="150" >
+    </a>
+    <div class="menu">
+    <a href="#schedule">Class Schedule</a> |
+    <a href="#location">Class Location</a> |
+    <a href="#stretch_strengthen">Stretch &amp; Strengthen</a> |
+    <a href="#aboutus">About Us</a> |
+    <a href="#safety">Safety &amp; Inclusivity</a> |
+    <a href="#faqs">FAQs</a> |
+    <a href="#contact">Contact</a>
+    </div>
+</header>
+<div id="header-spacer"></div>
+<div id="video-container"></div>
+
+
+<div id="loader">Loading...</div>
+<div id="firebaseui-auth-container"></div>
+<div id="login-details"></div>
+<div id="login-permissions"></div>
+<div id="session-list"></div>
+
+<script defer src="/__/firebase/8.1.2/firebase-app.js"></script>
+<script defer src="/__/firebase/8.1.2/firebase-auth.js"></script>
+<script defer src="/__/firebase/8.1.2/firebase-database.js"></script>
+
+<script defer src="/__/firebase/init.js"></script>
+
+<script defer src="https://www.gstatic.com/firebasejs/ui/4.6.1/firebase-ui-auth.js"></script>
+
+<!-- defer load of CSS file -->
+<link rel="preload" href="https://www.gstatic.com/firebasejs/ui/4.6.1/firebase-ui-auth.cs" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.6.1/firebase-ui-auth.css"></noscript>
+
+</body>
+</html>
+
