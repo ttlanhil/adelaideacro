@@ -5,7 +5,7 @@ const settings = require("./private/settings.js");
 
 const db = admin.database();
 
-const defaultSessionDuration = 1.5 * 60 * 60;  // 1.5hr or 90min
+const defaultSessionDuration = 1 * 60 * 60;  // 1hr or 60min
 
 const currentTimestamp = Date.now()/1000;
 
@@ -43,7 +43,7 @@ function updateBySession(sessionID, sessionData) {
 
     if (sessionID && !sessionData) {
         // if no sessionData, need to fetch from DB first
-        db.ref("sessions/"+"-MProPvI55GP5xtoz-pl").once("value", (sessionDataRef) => {
+        db.ref("sessions/"+sessionID).once("value", (sessionDataRef) => {
             sessionData = sessionDataRef.val();
             doUpdates();
         });
@@ -154,7 +154,12 @@ const iterateUsers = (callback, nextPageToken) => {
     .auth()
     .listUsers(100, nextPageToken)
     .then((listUsersResult) => {
-        listUsersResult.users.forEach(callback);
+        listUsersResult.users.forEach((userRecord) => {
+            if (userRecord.disabled) {
+                return;
+            }
+            _mergeUserWithUserData(userRecord).then(callback);
+        });
         if (listUsersResult.pageToken) {
             // List next batch of users.
             iterateUsers(callback, listUsersResult.pageToken);
@@ -166,12 +171,7 @@ const iterateUsers = (callback, nextPageToken) => {
 };
 
 function listUsers() {
-    iterateUsers( (userRecord) => {
-        if (userRecord.disabled) {
-            return;
-        }
-        _mergeUserWithUserData(userRecord).then((result) => console.log(result));
-    });
+    iterateUsers( console.log );
 }
 
 
@@ -210,7 +210,7 @@ function updateSession(sessionID, newDetails) {
     db.ref("sessions/" + sessionID).update(newDetails).then(()=> {
         // if anything other than name changed, update all user session entries
         delete newDetails["displayName"];
-        if (newDetails.length > 0){
+        if (Object.keys(newDetails).length > 0){
             updateBySession(sessionID);
         }
     });
@@ -244,7 +244,6 @@ module.exports = {
     setModerator,
     setParticipant,
     listUsers,
-    iterateUsers,
     getUserData,
     setSessionToken,
 
@@ -254,5 +253,4 @@ module.exports = {
     addSession,
     updateSession,
     listSessions,
-    iterateSessions,
 }
