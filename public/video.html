@@ -13,16 +13,28 @@
 <style>
 #video-container {position: fixed; top: 0; left: 0; height: 100%; width: 100%; margin: 0; z-index: -1;}
 #login-details {margin-bottom: 5px;}
+#load-status {height: 1em;}
 .session-entry {margin: 10px 0;}
 </style>
 
 <script>
 
+function setStatus(status) {
+    const elem = document.getElementById('load-status');
+    if (status) {
+        elem.children[0].innerHTML = status;
+        elem.children[0].style.display = "initial";
+    } else {
+        elem.children[0].style.display = "none";
+    }
+}
+
 function logout() {
     firebase.auth().signOut().then(function() {
         document.getElementById("login-details").innerHTML = "";
+        document.getElementById("login-permissions").innerHTML = "";
         document.getElementById("session-list").innerHTML = "";
-        document.getElementById('loader').style.display = "initial";
+        document.getElementById("page-details").style.display = "initial";
         // Sign-out successful.
     }).catch(function(error) {
         console.log("logout error:", error);
@@ -79,48 +91,58 @@ function updateName() {
     }
 }
 
+var sessions = [];
+var userData;
 
-function addSessionEntry([sessions, userData]) {
-    sessions = sessions.val();
-    userData = userData.val();
-    if (userData && userData.moderator) {
-        document.getElementById("login-permissions").innerHTML = "You are signed in as a moderator, you will be able to mute/remove people from meetings.";
-    } else if (userData && userData.participant) {
-        // all good, continue to session display
-    } else {
-        document.getElementById("login-permissions").innerHTML = "Thanks for signing up!<br/>We'll check for new sign-ups before each session, and you'll be able to join sessions once confirmed.<br/>If you haven't joined our sessions before, please <a href='/contact.html'>send a message</a> so we know who you are!";
-        return;
-    }
+function renderSessions() {
+    setStatus();
+
+    const isMod = (userData && userData.moderator);
+    const isParticipant = (userData && userData.participant && userData.sessionTokens);
+    document.getElementById("session-list").innerHTML = "Upcoming sessions:";
 
     for (let sessionID in sessions){
         const session = sessions[sessionID];
-        if (sessionID in userData.sessionTokens) {
-            const sessionEntry = document.createElement("div");
-            sessionEntry.className = "session-entry";
+        const sessionEntry = document.createElement("div");
+        sessionEntry.className = "session-entry";
 
-            let meetingDisplay = `<a href="#">${session.displayName}</a>`;
+        let meetingDisplay;
+        const canJoin = (isParticipant && sessionID in userData.sessionTokens);
+
+        if (canJoin) {
+            meetingDisplay = `<a href="#">${session.displayName}</a>`;
             if (session.modOnly) {
                 meetingDisplay += " (moderators only)";
             }
-            if (session.start) {
-                const startTime = new Date(session.start*1000);
-                const openTime = new Date(session.nbf*1000);
-                meetingDisplay += `<br />${startTime.toLocaleDateString()} ${formatHHMM(startTime)}`;
-                if (session.duration) {
-                    const endTime = new Date((session.start+session.duration)*1000);
-                    meetingDisplay += ` until ${formatHHMM(endTime)}`;
-                }
-                meetingDisplay += `<br />Open to join from ${formatHHMM(openTime)} (entry will fail before then).`;
+        } else if (session.modOnly) {
+            continue;
+        } else {
+            meetingDisplay = session.displayName;
+        }
+
+        if (session.start) {
+            const startTime = new Date(session.start*1000);
+            const openTime = new Date(session.nbf*1000);
+            meetingDisplay += `<br />${startTime.toLocaleDateString()} ${formatHHMM(startTime)}`;
+            if (session.duration) {
+                const endTime = new Date((session.start+session.duration)*1000);
+                meetingDisplay += ` until ${formatHHMM(endTime)}`;
             }
+            meetingDisplay += `<br />Open to join from ${formatHHMM(openTime)}`
+            if (!isMod) {
+                meetingDisplay += " (entry will fail before then).";
+            }
+        }
 
-            sessionEntry.innerHTML = meetingDisplay;
-
+        if (canJoin) {
             // wrap in closure to prevent variables all pointing to last meeting
             sessionEntry.onclick = (function(roomName, token){
                 return () => {loadVideo(roomName, token); return false;}
             })(session.roomName, userData.sessionTokens[sessionID]);
-            document.getElementById("session-list").appendChild(sessionEntry);
         }
+
+        sessionEntry.innerHTML = meetingDisplay;
+        document.getElementById("session-list").appendChild(sessionEntry);
     }
     if (document.getElementById("session-list").innerHTML.length <= 0){
         document.getElementById("session-list").innerHTML = "No upcoming sessions prepared - we'll announce them once they're available!";
@@ -129,12 +151,12 @@ function addSessionEntry([sessions, userData]) {
 
 
 function postLogin(user) {
-    document.getElementById('loader').style.display = "none";
     document.getElementById("login-permissions").innerHTML = "";
+    document.getElementById("page-details").style.display = "none";
 
-    let loggedInStr = ["Logged in as <em>" + (user.displayName || "New User") + "</em>"];
+    let loggedInStr = ["You are logged in as <em>" + (user.displayName || "New User") + "</em>"];
     if (user.providerData && user.providerData[0]) {
-        loggedInStr.push("(via " + user.providerData[0].providerId + ")");
+        loggedInStr.push("(signed in via " + user.providerData[0].providerId + ")");
     }
     loggedInStr.push("<br/>");
     loggedInStr.push("<a href='#' onclick='updateName(); return false;'>Update name</a>");
@@ -148,15 +170,29 @@ function postLogin(user) {
     }
 
     const currentTimestamp = Date.now()/1000;
-    const sessionsReq = firebase.database().ref('/sessions').orderByChild("start").startAt(currentTimestamp).once('value');
-    const userDataReq = firebase.database().ref('/users/'+ user.uid).once('value');
-
-    Promise.all([sessionsReq, userDataReq]).then( addSessionEntry );
+    const sessionsReq = firebase.database().ref('/sessions').orderByChild("start").startAt(currentTimestamp).on('value', (sessionsRef) => {
+        sessions = sessionsRef.val();
+        renderSessions();
+    });
+    const userDataReq = firebase.database().ref('/users/'+ user.uid).on('value', (userDataRef) => {
+        userData = userDataRef.val();
+        let loginPerms = "";
+        if (!userData) {
+            loginPerms = "Thanks for signing up!<br/>We'll check for new sign-ups before each session, and you'll be able to join sessions once confirmed.<br/>If you haven't joined our sessions before, please <a href='/contact'>send a message</a> so we know who you are!";
+        } else if (userData.moderator) {
+            loginPerms = "You are signed in as a moderator, you will be able to mute/remove people from meetings.";
+        }
+        document.getElementById("login-permissions").innerHTML = loginPerms;
+        renderSessions();
+    });
+    setStatus("Checking for upcoming sessions...");
 }
 
 
 function checkLogin() {
+    setStatus("Checking if you are logged in...");
     firebase.auth().onAuthStateChanged((user) => {
+        setStatus();
         if (user) {
             // User is signed in, see docs for a list of available properties
             // https://firebase.google.com/docs/reference/js/firebase.User
@@ -228,11 +264,18 @@ function loadVideo(roomName, jwt) {
 <div id="header-spacer"></div>
 <div id="video-container"></div>
 
-
-<div id="loader">Loading...</div>
-<div id="firebaseui-auth-container"></div>
+<div id="load-status"><span>Loading...</span></div>
 <div id="login-details"></div>
 <div id="login-permissions"></div>
+<div id="firebaseui-auth-container"></div>
+<div id="page-details">
+    <p>Adelaide Acrobalance run regular <a href="/stretch_strengthen">stretch sessions</a>.<br/>
+    If you haven't attended our classes before, please get in <a href="/contact">contact</a> first, as stretch sessions are intended for existing members.</p>
+    <p>To join an online session, please sign up, then return before the session is due to start.</p>
+    <p>You may sign-in using your Facebook or Google account, sign-up via email, or without an email address.<br/>
+    If you sign up via email or anonymously, please enter your name so we know who you are!<br/>
+    Once we've checked that we know who you are, you'll be added to the list of participants, and be able to join sessions.</p>
+</div>
 <div id="session-list"></div>
 
 <script defer src="/__/firebase/8.1.2/firebase-app.js"></script>
