@@ -145,7 +145,7 @@ function renderSessions() {
         document.getElementById("session-list").appendChild(sessionEntry);
     }
     if (document.getElementById("session-list").innerHTML.length <= 0){
-        document.getElementById("session-list").innerHTML = "No upcoming sessions prepared - we'll announce them once they're available!";
+        document.getElementById("session-list").innerHTML = "No upcoming sessions yet - we'll announce them once they're available!";
     }
 }
 
@@ -165,7 +165,7 @@ function postLogin(user) {
     document.getElementById("login-details").innerHTML = loggedInStr.join(" ");
 
     if (!user.displayName) {
-        document.getElementById("login-permissions").innerHTML = "Please update your name so we know who you are";
+        document.getElementById("login-permissions").innerHTML = "Please update your name so we know who you are.";
         return;
     }
 
