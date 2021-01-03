@@ -98,7 +98,7 @@ function renderSessions() {
     setStatus();
 
     const isMod = (userData && userData.moderator);
-    const isParticipant = (userData && userData.participant && userData.sessionTokens);
+    const isParticipant = isMod || (userData && userData.participant && userData.sessionTokens);
     document.getElementById("session-list").innerHTML = "Upcoming sessions:";
 
     for (let sessionID in sessions){
