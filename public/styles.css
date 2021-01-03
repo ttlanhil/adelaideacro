@@ -104,6 +104,49 @@ footer .menu {
     margin-bottom: -0.4em;
 }
 
+header div.dropdown:not(:last-child)::after {
+    content: " | ";
+}
+
+header div.dropdown {
+    display: inline-block;
+}
+
+header div.dropdown .inner {
+    display: none;
+}
+
+header div.dropdown:hover .inner {
+    display: block;
+    position: absolute;
+    margin-left: -11px;
+    margin-top: -2px;
+    border: 1px solid #def;
+    background: #f0faff;
+    padding: 0 10px;
+}
+
+header div.dropdown:hover .inner a {
+    display: block;
+/*     line-height: 2em; */
+    margin-top: 10px;
+}
+
+header div.dropdown:hover .inner a:last-child {
+    margin-bottom: 10px;
+}
+
+footer div a.dropdown-header {
+    display: none;
+}
+
+footer div.dropdown a::after {
+    content: " | ";
+}
+
+footer .dropdown, footer .inner {
+    display: inline-block;
+}
 
 #home div {
     padding: 5px 10px 5px 5px;
