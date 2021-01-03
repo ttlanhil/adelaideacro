@@ -9,7 +9,7 @@ const defaultSessionDuration = 1.5 * 60 * 60;  // 1.5hr or 90min
 
 const currentTimestamp = Date.now()/1000;
 
-const sessionJoinStartBuffer = 10*60;  // can join up to 10m early. ignored by mods.
+const sessionJoinStartBuffer = 15*60;  // can join up to 15m early. ignored by mods.
 
 function userCanJoinSession(user, session) {
     if (user.moderator) {
