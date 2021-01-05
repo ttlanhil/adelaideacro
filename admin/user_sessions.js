@@ -120,7 +120,11 @@ function _mergeUserWithUserData(userRecord) {
         name: userRecord.displayName,
         email: userRecord.email,
         lastLogin: userRecord.metadata.lastRefreshTime || userRecord.metadata.lastSignInTime,
+        emailVerified: userRecord.emailVerified,
     };
+    if (userRecord.providerData) {
+        mergedData.loginMethod = userRecord.providerData.map((a) => a.providerId).join(", ");
+    }
     return db.ref("users/"+userRecord.uid).once("value", (userDataRef) => {
         const userData = userDataRef.val();
         if (userData) {
