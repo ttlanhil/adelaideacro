@@ -170,7 +170,7 @@ function postLogin(user) {
         return;
     }
 
-    const currentTimestamp = Date.now()/1000;
+    const currentTimestamp = (Date.now()/1000) - 60*60; // any session that starts in the future, or up to an hour ago
     const sessionsReq = firebase.database().ref('/sessions').orderByChild("start").startAt(currentTimestamp).on('value', (sessionsRef) => {
         sessions = sessionsRef.val();
         renderSessions();
