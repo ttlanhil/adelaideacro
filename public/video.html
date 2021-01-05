@@ -44,6 +44,7 @@ function logout() {
 
 var authui;
 function showLogin() {
+    const loginPopup = false;
 
     var uiConfig = {
         callbacks: {
@@ -51,11 +52,11 @@ function showLogin() {
                 // User successfully signed in.
                 // Return type determines whether we continue the redirect automatically
                 // or whether we leave that to developer to handle.
-                return false;
+                return false;   // no redirect needed, everything happens on same page
             }
         },
         // Will use popup for IDP Providers sign-in flow instead of the default, redirect.
-        signInFlow: 'popup',
+        signInFlow: loginPopup ? 'popup' : 'redirect',
         signInOptions: [
             firebase.auth.GoogleAuthProvider.PROVIDER_ID,
             firebase.auth.FacebookAuthProvider.PROVIDER_ID,
