@@ -8,6 +8,7 @@ const db = admin.database();
 const defaultSessionDuration = 1 * 60 * 60;  // 1hr or 60min
 
 const currentTimestamp = Date.now()/1000;
+const ONE_DAY = 24*60*60;
 
 const sessionJoinStartBuffer = 15*60;  // can join up to 15m early. ignored by mods.
 
@@ -221,7 +222,7 @@ function iterateSessions(callback, includePast=false) {
     let dbRef = db.ref("sessions");
 
     if (!includePast) {
-        dbRef = dbRef.orderByChild("start").startAt(currentTimestamp);
+        dbRef = dbRef.orderByChild("start").startAt(currentTimestamp - ONE_DAY);
     }
 
     dbRef.once("value", (sessionDataRef) => {
