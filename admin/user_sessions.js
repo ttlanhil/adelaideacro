@@ -175,6 +175,7 @@ const iterateUsers = (callback, nextPageToken) => {
     });
 };
 
+// TODO: add sorting/filter to only show new users with a displayname or whatever
 function listUsers() {
     iterateUsers( console.log );
 }
