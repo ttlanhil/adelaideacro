@@ -218,12 +218,26 @@ function loadVideo(roomName, jwt) {
     const configOverwrite = {
         // Disables all invite functions from the app (share, invite, dial out...etc)
         disableInviteFunctions: true,
-
+        // Disables storing the room name to the recents list
         doNotStoreRoom: true,
-
+        // Start calls with audio muted. ... This one is only applied locally.
         startWithAudioMuted: true,
-
+        // Whether to use a welcome page or not. In case it's false a random room
+        // will be joined when no room is specified.
         enableWelcomePage: false,
+        // Hides lobby button
+        hideLobbyButton: true,
+        // Require users to always specify a display name. (will be provided to jitsi by the login)
+        requireDisplayName: true,
+        // Enabling the close page will ignore the welcome page redirection when
+        // a call is hangup.
+        enableClosePage: true,
+        // Disables profile and the edit of all fields from the profile settings (display name and email)
+        disableProfile: true,
+        // Whether or not some features are checked based on token.
+        enableFeaturesBasedOnToken: true,
+        // When 'true', it shows an intermediate page before joining, where the user can configure their devices.
+        prejoinPageEnabled: false,
     };
     const initData = { roomName, jwt, parentNode, configOverwrite };
 
