@@ -231,7 +231,13 @@ function checkLogin() {
     });
 }
 
-window.addEventListener('DOMContentLoaded', checkLogin, false);
+function onLoad() {
+    firebase.app().options["authDomain"] = "adelaideacrobalance.com.au";
+
+    checkLogin();
+}
+
+window.addEventListener('DOMContentLoaded', onLoad, false);
 
 </script>
 
