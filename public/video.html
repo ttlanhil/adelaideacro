@@ -125,8 +125,8 @@ function renderSessions() {
             const startTime = new Date(session.start*1000);
             const openTime = new Date(session.nbf*1000);
             meetingDisplay += `<br />${startTime.toLocaleDateString()} ${formatHHMM(startTime)}`;
-            if (session.duration) {
-                const endTime = new Date((session.start+session.duration)*1000);
+            if (session.end) {
+                const endTime = new Date(session.end*1000);
                 meetingDisplay += ` until ${formatHHMM(endTime)}`;
             }
             meetingDisplay += `<br />Open to join from ${formatHHMM(openTime)}`
@@ -171,7 +171,7 @@ function postLogin(user) {
     }
 
     const currentTimestamp = (Date.now()/1000) - 60*60; // any session that starts in the future, or up to an hour ago
-    const sessionsReq = firebase.database().ref('/sessions').orderByChild("start").startAt(currentTimestamp).on('value', (sessionsRef) => {
+    const sessionsReq = firebase.database().ref('/sessions').orderByChild("end").startAt(currentTimestamp).on('value', (sessionsRef) => {
         sessions = sessionsRef.val();
         renderSessions();
     });

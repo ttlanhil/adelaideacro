@@ -189,12 +189,15 @@ function setSessionToken(uid, sessionID, token) {
 
 
 
-function addSession(displayName, start, duration=defaultSessionDuration, modOnly=false, roomName=settings.defaultRoom) {
+function addSession(displayName, start, end, modOnly=false, roomName=settings.defaultRoom) {
     // start should be a UNIX timestamp, in seconds (not JS millis)
 
     const nbf = start - sessionJoinStartBuffer;    // NotBeFore
 
-    const details = { displayName, start, nbf, roomName, duration, modOnly };
+    // if end is specified, use it, otherwise calculate end time based on start and default duration
+    end = end || start + defaultSessionDuration;
+
+    const details = { displayName, start, end, nbf, roomName, modOnly };
     // generate new ID using push, key for new entry is return value
 
     const sessRef = db.ref("sessions").push();
@@ -222,7 +225,7 @@ function iterateSessions(callback, includePast=false) {
     let dbRef = db.ref("sessions");
 
     if (!includePast) {
-        dbRef = dbRef.orderByChild("start").startAt(currentTimestamp - ONE_DAY);
+        dbRef = dbRef.orderByChild("end").startAt(currentTimestamp);
     }
 
     dbRef.once("value", (sessionDataRef) => {

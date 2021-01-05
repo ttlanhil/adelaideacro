@@ -18,8 +18,6 @@ const jwtKey = fs.readFileSync(settings.jwtKeyFile);
 
 function create(session, user) {
     const isMod = user.moderator === "true";
-    // unless moderator, won't be able to join after scheduled end time
-    const valid_end = session.start + session.duration;
 
     const header = {
         alg: "RS256",
@@ -42,7 +40,7 @@ function create(session, user) {
         room: isMod ? "*" : session.roomName,
         // if not moderator, then include expiry times. spread operator to unpack the result of the conditional
         ...(isMod || {
-            exp: valid_end,
+            exp: session.end,
             nbf: session.nbf,
         }),
     }
