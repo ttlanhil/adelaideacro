@@ -99,17 +99,17 @@ function setUserFlag(uids, key, value) {
     uids.forEach((uid) => {
         updates[uid + "/" + key] = value;
     });
-    db.ref("users").update(updates).then(
+    return db.ref("users").update(updates).then(
         () => updateByUser(uids)
     );
 }
 
 function setModerator(uids, value=true) {
-    setUserFlag(uids, "moderator", value);
+    return setUserFlag(uids, "moderator", value);
 }
 
 function setParticipant(uids, value = true) {
-    setUserFlag(uids, "participant", value);
+    return setUserFlag(uids, "participant", value);
 }
 
 
@@ -146,9 +146,6 @@ function getUserData(uid) {
     .getUser(uid)
     .then((userRecord) => {
         return _mergeUserWithUserData(userRecord);
-    })
-    .catch((error) => {
-        console.log('Error fetching user data:', error);
     });
 }
 
@@ -169,15 +166,15 @@ const iterateUsers = (callback, nextPageToken) => {
             // List next batch of users.
             iterateUsers(callback, listUsersResult.pageToken);
         }
-    })
-    .catch((error) => {
-        console.log('Error iterating users:', error);
     });
 };
 
 // TODO: add sorting/filter to only show new users with a displayname or whatever
-function listUsers() {
-    iterateUsers( console.log );
+async function listUsers() {
+    let users = await admin.auth().listUsers();
+    users = users.users.filter(userRecord => ! userRecord.disabled);
+    users = users.map(userRecord => _mergeUserWithUserData(userRecord));
+    return Promise.all(users);
 }
 
 
@@ -206,8 +203,9 @@ function addSession(displayName, start, end, modOnly=false, roomName=settings.de
     // generate new ID using push, key for new entry is return value
 
     const sessRef = db.ref("sessions").push();
-    sessRef.set(details).then( () => updateBySession(sessRef.key, details) );
+    return sessRef.set(details).then( () => updateBySession(sessRef.key, details) );
 }
+
 
 function updateSession(sessionID, newDetails) {
     // only apply changes in newDetails, existing details remain as they are
@@ -216,7 +214,7 @@ function updateSession(sessionID, newDetails) {
         newDetails.nbf = newDetails.start - sessionJoinStartBuffer
     }
 
-    db.ref("sessions/" + sessionID).update(newDetails).then(()=> {
+    return db.ref("sessions/" + sessionID).update(newDetails).then(()=> {
         // if anything other than name changed, update all user session entries
         delete newDetails["displayName"];
         if (Object.keys(newDetails).length > 0){
@@ -243,8 +241,16 @@ function iterateSessions(callback, includePast=false) {
 }
 
 
-function listSessions(includePast=false) {
-    iterateSessions(console.log, includePast);
+async function listSessions(includePast=false) {
+    let dbRef = db.ref("sessions");
+
+    if (!includePast) {
+        dbRef = dbRef.orderByChild("end").startAt(currentTimestamp);
+    }
+
+    let sessions = await dbRef.once("value");
+
+    return sessions.val();
 }
 
 
@@ -254,10 +260,6 @@ module.exports = {
     setParticipant,
     listUsers,
     getUserData,
-    setSessionToken,
-
-    updateBySession,
-    updateByUser,
 
     addSession,
     updateSession,
