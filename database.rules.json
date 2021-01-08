@@ -8,7 +8,7 @@
         },
         "users": {
             "$uid": {
-                ".read": "$uid === auth.uid"
+                ".read": "root.child('users').child(auth.uid).child('moderator').exists() || $uid === auth.uid"
             }
         }
     }
