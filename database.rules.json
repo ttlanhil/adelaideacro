@@ -7,8 +7,17 @@
             ".indexOn": "end"
         },
         "users": {
+            ".read": "root.child('users').child(auth.uid).child('moderator').exists()",
             "$uid": {
-                ".read": "root.child('users').child(auth.uid).child('moderator').exists() || $uid === auth.uid"
+                ".read": "$uid === auth.uid",
+                "name": {
+                    ".validate": "newData.isString() && newData.val().length < 100",
+                    ".write": "$uid === auth.uid",
+                },
+                "lastLogin": {
+                    ".validate": "newData.isNumber() && newData.val() > 1000000000000 && newData.val() < 10000000000000",
+                    ".write": "$uid === auth.uid",
+                }
             }
         }
     }
