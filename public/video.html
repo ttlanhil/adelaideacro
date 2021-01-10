@@ -20,81 +20,9 @@
 .session-entry {margin: 10px 0;}
 </style>
 
+<script src='account.js' async></script>
+
 <script>
-
-function setStatus(status) {
-    const elem = document.getElementById('load-status');
-    if (status) {
-        elem.children[0].innerHTML = status;
-        elem.children[0].style.display = "initial";
-    } else {
-        elem.children[0].style.display = "none";
-    }
-}
-
-function logout() {
-    firebase.auth().signOut().then(function() {
-        document.getElementById("login-details").innerHTML = "";
-        document.getElementById("login-permissions").innerHTML = "";
-        document.getElementById("session-list").innerHTML = "";
-        document.getElementById("page-details").style.display = "initial";
-        // Sign-out successful.
-    }).catch(function(error) {
-        console.log("logout error:", error);
-        // An error happened.
-    });
-}
-
-var authui;
-function showLogin() {
-    const loginPopup = false;
-
-    var uiConfig = {
-        callbacks: {
-            signInSuccessWithAuthResult: function(authResult, redirectUrl) {
-                // User successfully signed in.
-                // Return type determines whether we continue the redirect automatically
-                // or whether we leave that to developer to handle.
-                return false;   // no redirect needed, everything happens on same page
-            }
-        },
-        // Will use popup for IDP Providers sign-in flow instead of the default, redirect.
-        signInFlow: loginPopup ? 'popup' : 'redirect',
-        signInOptions: [
-            firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-            firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-            firebase.auth.EmailAuthProvider.PROVIDER_ID,
-            firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID
-        ],
-        // Terms of service url.
-        tosUrl: '/legal.html',
-        // Privacy policy url.
-        privacyPolicyUrl: '/legal.html'
-    };
-
-    authui = authui || new firebaseui.auth.AuthUI(firebase.auth());
-
-    authui.start('#firebaseui-auth-container', uiConfig);
-}
-
-
-function formatHHMM(date) {
-    function z(n){return (n<10?'0':'') + n;}
-    var h = date.getHours();
-    return (h%12||12) + ':' + z(date.getMinutes()) + ' ' + (h<12?'AM':'PM');
-}
-
-
-function updateName() {
-    var user = firebase.auth().currentUser;
-    const newName = prompt("Enter new display name", user.displayName || "");
-    if (newName != null) {
-        user.updateProfile({
-            displayName: newName,
-        }).then( () => postLogin(user) );
-    }
-}
-
 var sessions = [];
 var userData;
 
@@ -154,25 +82,7 @@ function renderSessions() {
 }
 
 
-function postLogin(user) {
-    document.getElementById("login-permissions").innerHTML = "";
-    document.getElementById("page-details").style.display = "none";
-
-    let loggedInStr = ["You are logged in as <em>" + (user.displayName || "New User") + "</em>"];
-    if (user.providerData && user.providerData[0]) {
-        loggedInStr.push("(signed in via " + user.providerData[0].providerId + ")");
-    }
-    loggedInStr.push("<br/>");
-    loggedInStr.push("<a href='#' onclick='updateName(); return false;'>Update name</a>");
-    loggedInStr.push("|");
-    loggedInStr.push("<a href='#' onclick='logout(); return false;'>Logout</a>");
-    document.getElementById("login-details").innerHTML = loggedInStr.join(" ");
-
-    if (!user.displayName) {
-        document.getElementById("login-permissions").innerHTML = "Please update your name so we know who you are.";
-        return;
-    }
-
+function postLoginCallback(user) {
     const currentTimestamp = (Date.now()/1000) - 60*60; // any session that starts in the future, or up to an hour ago
     const sessionsReq = firebase.database().ref('/sessions').orderByChild("end").startAt(currentTimestamp).on('value', (sessionsRef) => {
         sessions = sessionsRef.val();
@@ -192,28 +102,6 @@ function postLogin(user) {
     setStatus("Checking for upcoming sessions...");
 }
 
-
-function checkLogin() {
-    setStatus("Checking if you are logged in...");
-    firebase.auth().onAuthStateChanged((user) => {
-        setStatus();
-        if (user) {
-            // User is signed in, see docs for a list of available properties
-            // https://firebase.google.com/docs/reference/js/firebase.User
-            postLogin(user);
-        } else {
-            showLogin();
-        }
-    });
-}
-
-function onLoad() {
-    firebase.app().options["authDomain"] = "adelaideacrobalance.com.au";
-
-    checkLogin();
-}
-
-window.addEventListener('DOMContentLoaded', onLoad, false);
 
 </script>
 
@@ -253,11 +141,11 @@ function loadVideo(roomName, jwt) {
 
     // Init the iframe API with the domain you've set in Branding, or 8x8.vc if you don't have one yet
 //     const api = new JitsiMeetExternalAPI("adelaideacrobalance.com.au", initData);
-    // TODO: hide sign-in page and such
     videoAPI = new JitsiMeetExternalAPI("8x8.vc", initData);
     document.getElementById("video-container").style.zIndex = 100;
 
     // TODO: likewise for auth failure, time failure, etc
+    // TODO: allow escape/etc to close on failure
     // auto-close iframe when meeting ends
     videoAPI.on("readyToClose", () => {
         videoAPI.dispose();
