@@ -113,12 +113,10 @@ header div.dropdown {
 }
 
 header div.dropdown .inner {
-    display: none;
-}
-
-header div.dropdown:hover .inner {
-    display: block;
     position: absolute;
+    display: block;
+    transition: 0.5s;
+    opacity: 0;
     margin-left: -11px;
     margin-top: -2px;
     border: 1px solid #def;
@@ -126,13 +124,16 @@ header div.dropdown:hover .inner {
     padding: 0 10px;
 }
 
-header div.dropdown:hover .inner a {
+header div.dropdown:hover .inner {
+    opacity: 1;
+}
+
+header div.dropdown .inner a {
     display: block;
-/*     line-height: 2em; */
     margin-top: 10px;
 }
 
-header div.dropdown:hover .inner a:last-child {
+header div.dropdown .inner a:last-child {
     margin-bottom: 10px;
 }
 
