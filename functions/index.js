@@ -75,3 +75,13 @@ exports.updateSession = functions.https.onRequest((request, response) => {
 
     return _tryDo(response, userSessions.updateSession, session, args);
 });
+
+
+exports.deleteSession = functions.https.onRequest((request, response) => {
+    const session = _param(request, "sessionID");
+    if (!session) {
+        return response.status(400).send("sessionID not specified");
+    }
+
+    return _tryDo(response, userSessions.deleteSession, session);
+});
