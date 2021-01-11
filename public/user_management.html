@@ -19,35 +19,92 @@
 #load-status {height: 1em;}
 .session-entry {margin: 10px 0;}
 
-.clickable {cursor: pointer;}
+.clickable {cursor: pointer; text-decoration: underline;}
+
+#session-list, #user-list {
+    margin: 10px;
+    white-space: nowrap;
+}
+
+td:not(:last-child), th:not(:last-child) {
+    padding-right: 5px;
+}
+
+#session-form {
+    display: grid;
+    grid-gap: 10px;
+    grid-template-columns: auto auto auto;  /*repeat(3, 1fr);*/
+}
+
 #shield {
+    z-index: 10;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.5s, visibility 0.5s;
+    background-color: #999;
+}
+
+#session-modal, #session-modal-background, #shield {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     margin: 0;
-    z-index: 10;
-    background-color: #999;
-    visibility: hidden;
-    opacity: 0;
-    transition: opacity 0.5s, visibility 0.5s;
 }
+
+#session-modal-background {
+    background-color: rgba(100, 100, 100, 0.3);
+}
+
+#session-modal {
+    z-index: 200;
+    display: none;
+}
+
+#session-modal-form {
+    padding: 15px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 250;
+    background-color: #fff;
+}
+
+
 </style>
 
 <script src='account.js' async></script>
 
 <script>
 
-// TODO: before allowing use, limit control of setModerator
-// TODO: pass and check auth on backend
+// TODO: before allowing external use, limit control of setModerator; pass and check auth on backend
 // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
 // https://cloud.google.com/functions/docs/securing/authenticating
 
 const functionPath = "http://localhost:5001/website-48ee6/us-central1/";
 
-// TODO: modals for adding/updating sessions
-
+const sessionFieldDefinitions = {
+    displayName: "Session Name",
+    start: {
+        name: "Start",
+        type: "time",
+    },
+    end: {
+        name: "End",
+        type: "time",
+    },
+    nbf: {
+        name: "Opens",
+        type: "time",
+    },
+    roomName: "Room",
+    modOnly: {
+        name: "Mod only",
+        type: "boolean"
+    }
+};
 
 
 async function callFunction(functionName, params) {
@@ -109,11 +166,6 @@ function renderUsers(users) {
 }
 
 
-
-// modal session details form
-// ✔  functions[addSession]: http function initialized (functionPath/addSession).
-// ✔  functions[updateSession]: http function initialized (functionPath/updateSession).
-
 function renderSessions(sessions) {
     setStatus();
     console.log("renderSessions", sessions);
@@ -125,7 +177,7 @@ function renderSessions(sessions) {
     for (let sessionID in sessions){
         const session = sessions[sessionID];
 
-        sessionList += `<tr><td>${session.displayName}</td><td>${sessionID}</td>`;
+        sessionList += `<tr><td>${session.displayName}</td><td><a href="#" onclick="showSessionModal('${sessionID}'); return false;">${sessionID}</a></td>`;
 
         sessionList += "<td>";
         if (session.nbf) {
@@ -149,27 +201,43 @@ function renderSessions(sessions) {
         }
         sessionList += "</td><td>";
         if (session.roomName) {
-            sessionList += session.roomName.replace(/.*\//, "");
+            sessionList += session.roomName;
         }
         sessionList += "</td></tr>";
     }
 
     sessionList += "</table>";
+    sessionList += "<a href='#' onclick='showSessionModal(); return false'>Add New Session</a>";
     document.getElementById("session-list").innerHTML = sessionList;
 }
 
+
+// Check if the list of sessions or users changes (or the order)
+// If data of an individual changes, but it's in the same place, that doesn't need click-guarding
+var prevSessionIDs = "";
+var prevUserIDs = "";
 
 function postLoginCallback(user) {
     const currentTimestamp = (Date.now()/1000) - 60*60; // any session that starts in the future, or up to an hour ago
 
     firebase.database().ref('sessions')/*.orderByChild("end").startAt(currentTimestamp)*/.on('value', (sessionsRef) => {
-        shield();
-        renderSessions(sessionsRef.val());
+        const sessions = sessionsRef.val();
+        const sessionIDs = Object.keys(sessions).toString();
+        if (sessionIDs !== prevSessionIDs){
+            prevSessionIDs = sessionIDs;
+            shield();
+        }
+        renderSessions(sessions);
     });
 
     firebase.database().ref('users').on('value', (userDataRef) => {
-        shield();
-        renderUsers(userDataRef.val());
+        const users = userDataRef.val();
+        const userIDs = Object.keys(users).toString();
+        if (userIDs !== prevUserIDs){
+            prevUserIDs = userIDs;
+            shield();
+        }
+        renderUsers(users);
     });
 }
 
@@ -184,6 +252,131 @@ function shield() {
         elem.style.visibility = "hidden";
         elem.style.opacity = 0;
     }, 300);
+}
+
+
+function sessionModalRenderDateTime() {
+    // render date from elem to display span
+    const timestamp = Date.parse(this.value);
+    if (!timestamp || isNaN(timestamp)) {
+        return;
+    }
+    const parsed = new Date(timestamp);
+    const renderedTime = `${parsed.toLocaleDateString()} ${formatHHMM(parsed)}`;
+    document.getElementById(this.id + "-render").innerHTML = renderedTime;
+}
+
+
+function sessionModalSave() {
+    const sessionData = {};
+
+    for (let field in sessionFieldDefinitions) {
+        const elem = document.getElementById("input-session-" + field);
+        const type = typeof sessionFieldDefinitions[field] === "object" && sessionFieldDefinitions[field].type ? sessionFieldDefinitions[field].type : "text";
+        if (type === "time") {
+            const timestamp = Date.parse(elem.value)/1000;
+            if (timestamp && ! isNaN(timestamp)) {
+                sessionData[field] = timestamp;
+            }
+        } else if (type === "boolean") {
+            const selectedVal = elem.options[elem.selectedIndex].value;
+            if (selectedVal) {
+                sessionData[field] = selectedVal;
+            }
+        } else {
+            const val = elem.value;
+            if (val) {
+                sessionData[field] = val;
+            }
+        }
+    }
+    if (sessionData){
+        const sessionID = document.getElementById("input-session-sessionID").value;
+        if (sessionID) {
+            callFunction("updateSession", {sessionID, ...sessionData});
+        } else {
+            callFunction("addSession", sessionData);
+        }
+    } else {
+        return false;
+    }
+
+    closeSessionModal()
+}
+
+
+function createElem(type, attributes, properties) {
+    const elem = document.createElement(type);
+    for (let name in attributes) {
+        elem.setAttribute(name, attributes[name]);
+    }
+    for (let name in properties) {
+        elem[name] = properties[name];
+    }
+    return elem;
+}
+
+
+function showSessionModal(sessionID = "") {
+    const formElem = document.getElementById("session-form");
+    formElem.innerHTML = "";
+    for (let field in sessionFieldDefinitions) {
+        const display = typeof sessionFieldDefinitions[field] === "object" ? sessionFieldDefinitions[field].name : sessionFieldDefinitions[field];
+        const type = typeof sessionFieldDefinitions[field] === "object" && sessionFieldDefinitions[field].type ? sessionFieldDefinitions[field].type : "text";
+
+        const label = createElem("label", {"for": "input-sessions-" + field}, {innerHTML: display});
+        formElem.appendChild(label);
+
+        if (type === "boolean") {
+            const select = createElem("select", {"id": "input-session-" + field, "name": field})
+            const boolOptions = {"Unspecified": "", "True": "true", "False": "false"};
+            Object.entries(boolOptions).forEach(([name, value]) => {
+                const option = createElem("option", {"value": value}, {"text": name})
+                select.add(option);
+            });
+            formElem.appendChild(select);
+        } else {
+            const input = createElem("input", {"id": "input-session-" + field, "name": field});
+            if (type === "time") {
+                input.onchange = sessionModalRenderDateTime;
+                input.onkeyup = sessionModalRenderDateTime;
+                input.setAttribute("type", "text");
+            } else {
+                input.setAttribute("type", type);
+            }
+            formElem.appendChild(input);
+        }
+
+        const renderSpan = createElem("span", {"id": "input-session-" + field + "-render"});
+        formElem.appendChild(renderSpan);
+    }
+
+    const saveButton = createElem("button", {}, {"onclick": sessionModalSave, "innerHTML": "Save"});
+    formElem.appendChild(saveButton);
+
+    const closeButton = createElem("button", {}, {"onclick": closeSessionModal, "innerHTML": "Close"});
+    formElem.appendChild(closeButton);
+
+    if (sessionID) {
+        const deleteButton = createElem("button", {}, {"onclick": () => deleteSession(sessionID), "innerHTML": "Delete Session"});
+        formElem.appendChild(deleteButton);
+    }
+
+    const inputID = createElem("input", {"id": "input-session-sessionID", "name": "sessionID", "value": sessionID, "type": "hidden"});
+    formElem.appendChild(inputID);
+
+    document.getElementById("session-modal").style.display = "block";
+}
+
+function closeSessionModal() {
+    document.getElementById("session-modal").style.display = "none";
+}
+
+function deleteSession(sessionID) {
+    if (confirm("Really delete session " + sessionID + "?")){
+        callFunction("deleteSession", {sessionID});
+        closeSessionModal();
+    }
 }
 
 </script>
@@ -225,6 +418,19 @@ function shield() {
 </header>
 <div id="header-spacer"></div>
 <div id="shield"></div>
+
+<div id="session-modal">
+<div id="session-modal-background" onclick="closeSessionModal()"></div>
+<div id="session-modal-form">
+<form id="session-form" onsubmit="return false;">
+</form>
+<p>
+Enter session details.<br/>
+If creating a new session, Name and Start must be specified, other fields are optional and have default values.<br/>
+If updating an existing session, only fields which are filled in will be updated (Opens is automatically updated as well based on Start).
+</p>
+</div>
+</div>
 
 <div id="load-status"><span>Loading...</span></div>
 <div id="login-details"></div>
