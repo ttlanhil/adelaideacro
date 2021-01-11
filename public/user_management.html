@@ -19,8 +19,19 @@
 #load-status {height: 1em;}
 .session-entry {margin: 10px 0;}
 
-.clickable {
-    cursor: pointer;
+.clickable {cursor: pointer;}
+#shield {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    z-index: 10;
+    background-color: #999;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.5s, visibility 0.5s;
 }
 </style>
 
@@ -28,10 +39,14 @@
 
 <script>
 
+// TODO: before allowing use, limit control of setModerator
+// TODO: pass and check auth on backend
+// https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+// https://cloud.google.com/functions/docs/securing/authenticating
+
 const functionPath = "http://localhost:5001/website-48ee6/us-central1/";
 
-// TODO: when updating, disable UI for a second (so no misclicks)
-// TODO: modals for adding/updating users/sessions
+// TODO: modals for adding/updating sessions
 
 
 
@@ -104,7 +119,7 @@ function renderSessions(sessions) {
     console.log("renderSessions", sessions);
 
     let sessionList = "<table><tr>";
-    sessionList += ["name", "id", "opens", "start", "end", "modOnly", "room"].map((name) => "<th>"+name+"</th>").join("");
+    sessionList += ["Session name", "Id", "Opens", "Start", "End", "modOnly", "Room"].map((name) => "<th>"+name+"</th>").join("");
     sessionList += "</tr>";
 
     for (let sessionID in sessions){
@@ -148,12 +163,27 @@ function postLoginCallback(user) {
     const currentTimestamp = (Date.now()/1000) - 60*60; // any session that starts in the future, or up to an hour ago
 
     firebase.database().ref('sessions')/*.orderByChild("end").startAt(currentTimestamp)*/.on('value', (sessionsRef) => {
+        shield();
         renderSessions(sessionsRef.val());
     });
 
     firebase.database().ref('users').on('value', (userDataRef) => {
+        shield();
         renderUsers(userDataRef.val());
     });
+}
+
+
+function shield() {
+    // prevent any clicks just after a redraw, in case the new data moves elements around and the click goes to the wrong place
+    // TODO: only trigger if the list of IDs changes (entries added/removed/reordered) as it should be safe otherwise
+    const elem = document.getElementById("shield");
+    elem.style.visibility = "visible";
+    elem.style.opacity = "0.5";
+    setTimeout(() => {
+        elem.style.visibility = "hidden";
+        elem.style.opacity = 0;
+    }, 300);
 }
 
 </script>
@@ -194,6 +224,7 @@ function postLoginCallback(user) {
     </div>
 </header>
 <div id="header-spacer"></div>
+<div id="shield"></div>
 
 <div id="load-status"><span>Loading...</span></div>
 <div id="login-details"></div>
