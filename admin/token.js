@@ -39,7 +39,7 @@ function create(session, user) {
         },
         sub: settings.tenant_id,
         iss: "chat",
-//         room: isMod ? "*" : session.roomName,
+//         room: isMod ? "*" : settings.tenant_id + "/" + session.roomName,
         room: "*",
         // if not moderator, then include expiry times. spread operator to unpack the result of the conditional
         ...(isMod || {
