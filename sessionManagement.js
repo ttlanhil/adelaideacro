@@ -1,7 +1,5 @@
 const userSessions = require("./admin/user_sessions.js");
 
-// TODO: add a UI of some sort
-
 // TODO: ability to prune old user accounts (particularly anonymous logins)
 // TODO: remove DB entries for any deleted user accounts
 
