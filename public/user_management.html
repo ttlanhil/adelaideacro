@@ -79,7 +79,7 @@ function renderUsers(users) {
     console.log("renderUsers", users);
 
     let userList = "<table><tr>";
-    userList += ["name", "id", "last login", "participant", "moderator"].map((name) => "<th>"+name+"</th>").join("");
+    userList += ["Name", "ID", "Last Login", "Participant", "Moderator"].map((name) => "<th>"+name+"</th>").join("");
     userList += "</tr>";
 
     const optionButton = (userID, ticked, functionName) => {
@@ -119,7 +119,7 @@ function renderSessions(sessions) {
     console.log("renderSessions", sessions);
 
     let sessionList = "<table><tr>";
-    sessionList += ["Session name", "Id", "Opens", "Start", "End", "modOnly", "Room"].map((name) => "<th>"+name+"</th>").join("");
+    sessionList += ["Session Name", "ID", "Opens", "Start", "End", "modOnly", "Room"].map((name) => "<th>"+name+"</th>").join("");
     sessionList += "</tr>";
 
     for (let sessionID in sessions){
