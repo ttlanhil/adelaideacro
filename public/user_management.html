@@ -85,6 +85,7 @@ td:not(:last-child), th:not(:last-child) {
 
 const functionPath = "http://localhost:5001/website-48ee6/us-central1/";
 
+// TODO: support nbf and end being offsets from start?
 const sessionFieldDefinitions = {
     displayName: "Session Name",
     start: {
@@ -340,7 +341,7 @@ function showSessionModal(sessionID = "") {
             if (type === "time") {
                 input.onchange = sessionModalRenderDateTime;
                 input.onkeyup = sessionModalRenderDateTime;
-                input.setAttribute("type", "text");
+                input.setAttribute("type", "datetime-local");
             } else {
                 input.setAttribute("type", type);
             }
