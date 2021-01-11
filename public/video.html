@@ -91,7 +91,7 @@ function postLoginCallback(user) {
     const userDataReq = firebase.database().ref('/users/'+ user.uid).on('value', (userDataRef) => {
         userData = userDataRef.val();
         let loginPerms = "";
-        if (!userData) {
+        if (!(userData && userData.participant)) {
             loginPerms = "Thanks for signing up!<br/>We'll check for new sign-ups before each session, and you'll be able to join sessions once confirmed.<br/>If you haven't joined our sessions before, please <a href='/contact'>send a message</a> so we know who you are!";
         } else if (userData.moderator) {
             loginPerms = "You are signed in as a moderator, you will be able to mute/remove people from meetings.";
