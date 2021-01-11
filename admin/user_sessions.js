@@ -191,6 +191,22 @@ function setSessionToken(uid, sessionID, token) {
 
 
 
+
+function deleteSession(sessionID) {
+    return db.ref("sessions/" + sessionID).remove().then(()=> {
+        db.ref("users").once("value", (userRef) => {
+            const userData = userRef.val();
+            for (let userID in userData) {
+                const sessions = userData[userID].sessionTokens;
+                if (sessions && sessionID in sessions) {
+                    db.ref("users/" + userID + "/sessionTokens/" + sessionID).remove();
+                }
+            }
+        });
+    });
+}
+
+
 function addSession(displayName, start, end, modOnly=false, roomName=settings.defaultRoom) {
     // start should be a UNIX timestamp, in seconds (not JS millis)
 
@@ -264,4 +280,5 @@ module.exports = {
     addSession,
     updateSession,
     listSessions,
+    deleteSession,
 }
