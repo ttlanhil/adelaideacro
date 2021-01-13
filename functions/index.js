@@ -68,7 +68,7 @@ exports.updateSession = functions.https.onRequest((request, response) => {
     let args = {};
     ["displayName", "start", "end", "modOnly", "roomName"].forEach((argName) => {
         const argVal = _param(request, argName);
-        if (argVal) {
+        if (argVal !== null) {
             args[argName] = argVal;
         }
     });
