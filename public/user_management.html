@@ -246,7 +246,6 @@ function postLoginCallback(user) {
 
 function shield() {
     // prevent any clicks just after a redraw, in case the new data moves elements around and the click goes to the wrong place
-    // TODO: only trigger if the list of IDs changes (entries added/removed/reordered) as it should be safe otherwise
     const elem = document.getElementById("shield");
     elem.style.visibility = "visible";
     elem.style.opacity = "0.5";
