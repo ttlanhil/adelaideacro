@@ -1,11 +1,5 @@
 const userSessions = require("./admin/user_sessions.js");
 
-// TODO: ability to prune old user accounts (particularly anonymous logins)
-// TODO: remove DB entries for any deleted user accounts
-
-// remove old sessions
-// TODO: remove user tokens for expired or deleted sessions
-
 const testSessionID = "-MPscMFlTngGQt_CyvqJ";
 const stretchSessionID = "-MQ5ymANs7HAbkVusdEr";
 
@@ -23,8 +17,10 @@ const stretchSessionID = "-MQ5ymANs7HAbkVusdEr";
 
 // userSessions.setModerator("qvFgAQhQQ5U3leY2YRX6L4YfR513", false);
 
-userSessions.listSessions().then(console.log);
+// userSessions.listSessions().then(console.log);
 
-userSessions.listUsers().then(console.log);
+// userSessions.listUsers().then(console.log);
 
 // userSessions.getUserData("Tp6WPruKcudEJwKgEncOxqU2LNv1").then(console.log);
+
+userSessions.cleanUp();
