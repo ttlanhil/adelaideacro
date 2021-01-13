@@ -8,7 +8,6 @@ const db = admin.database();
 const defaultSessionDuration = 1 * 60 * 60;  // 1hr or 60min
 
 const currentTimestamp = Date.now()/1000;
-const ONE_DAY = 24*60*60;
 
 const sessionJoinStartBuffer = 15*60;  // can join up to 15m early. ignored by mods.
 
@@ -150,7 +149,7 @@ function getUserData(uid) {
 }
 
 
-const iterateUsers = (callback, nextPageToken) => {
+const iterateUsers = (callback, includeUserData=true, nextPageToken) => {
     // List batch of users
     admin
     .auth()
@@ -160,11 +159,15 @@ const iterateUsers = (callback, nextPageToken) => {
             if (userRecord.disabled) {
                 return;
             }
-            _mergeUserWithUserData(userRecord).then(callback);
+            if (includeUserData) {
+                _mergeUserWithUserData(userRecord).then(callback);
+            } else {
+                callback(userRecord);
+            }
         });
         if (listUsersResult.pageToken) {
             // List next batch of users.
-            iterateUsers(callback, listUsersResult.pageToken);
+            iterateUsers(callback, includeUserData, listUsersResult.pageToken);
         }
     });
 };
@@ -253,7 +256,6 @@ function iterateSessions(callback, includePast=false) {
             callback(sessionID, sessionData[sessionID]);
         }
     });
-
 }
 
 
@@ -270,6 +272,57 @@ async function listSessions(includePast=false) {
 }
 
 
+function checkExpireUser(user) {
+    const timeSinceLogin = Date.now() - Date.parse(user.lastLogin);
+
+    if (user.loginMethod) {
+        // only delete anonymous logins for now
+        return;
+    }
+
+    const expiryDays = 15;
+    // If they logged in anonymously, and haven't logged in for 15 days, assume the login no longer exists
+    const expiryDuration = 1000*60*60*24*expiryDays;
+    if (timeSinceLogin <= expiryDuration) {
+        return;
+    }
+
+    return admin.auth().deleteUser(user.uid).then(() => {
+        return db.ref("users/" + user.uid).remove();
+    });
+}
+
+
+function cleanUp() {
+    // Expire any old user accounts
+    iterateUsers(checkExpireUser, includeUserData=true);
+
+    listSessions().then((sessions) => {
+        const upcomingSessions = Object.keys(sessions);
+
+        db.ref("users").once("value", (userDataRef) => {
+            const userData = userDataRef.val();
+            for (let userID in userData) {
+                admin.auth().getUser(userID).then((userRecord) => {
+                    // delete any sessionTokens not in upcomingSessions
+                    for (let sessionID in userData[userID].sessionTokens) {
+                        if (! (sessionID in sessions)) {
+                            db.ref("users/" + userID + "/sessionTokens/" + sessionID).remove();
+                        }
+                    }
+                }).catch((err) => {
+                    if (err.errorInfo.code === "auth/user-not-found") {
+                        // Not in authDB? remove entry
+                        return db.ref("users/" + userID).remove();
+                    }
+                    throw err;
+                });
+            }
+        });
+    });
+}
+
+
 
 module.exports = {
     setModerator,
@@ -281,4 +334,6 @@ module.exports = {
     updateSession,
     listSessions,
     deleteSession,
+
+    cleanUp,
 }
