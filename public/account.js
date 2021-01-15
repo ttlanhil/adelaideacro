@@ -116,6 +116,10 @@ function checkLogin() {
 }
 
 function onLoad() {
+    if (! firebase){
+        setTimeout(onLoad, 100);
+        return;
+    }
     firebase.app().options["authDomain"] = "adelaideacrobalance.com.au";
 
     checkLogin();
