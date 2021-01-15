@@ -110,7 +110,16 @@ function postLoginCallback(user) {
 
 var videoAPI;
 
+function hideVideo() {
+    videoAPI && videoAPI.dispose();
+    document.getElementById("video-container").style.zIndex = -1;
+}
+
 function loadVideo(roomName, jwt) {
+    const roomPrefix = "vpaas-magic-cookie-05ca9267e73a40c4a44d114b585ea62b";
+    if (roomName && roomName.indexOf("/") < 0) {
+        roomName = roomPrefix + "/" + roomName;
+    }
     // The init options as per https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-iframe
     const parentNode = document.querySelector('#video-container');
     const configOverwrite = {
@@ -147,10 +156,7 @@ function loadVideo(roomName, jwt) {
     // TODO: likewise for auth failure, time failure, etc
     // TODO: allow escape/etc to close on failure
     // auto-close iframe when meeting ends
-    videoAPI.on("readyToClose", () => {
-        videoAPI.dispose();
-        document.getElementById("video-container").style.zIndex = -1;
-    });
+    videoAPI.on("readyToClose", hideVideo);
 }
 
 </script>
