@@ -73,12 +73,17 @@ td:not(:last-child), th:not(:last-child) {
     border: 1px solid black;
 }
 
+.inset {
+    margin-left: 1em;
+}
+
 
 </style>
 
 <script src='account.js' async></script>
 
 <script>
+"use strict";
 
 // TODO: before allowing external use, limit control of setModerator; pass and check auth on backend
 // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
@@ -86,9 +91,8 @@ td:not(:last-child), th:not(:last-child) {
 
 const functionPath = "http://localhost:5001/website-48ee6/us-central1/";
 
-// TODO: support nbf and end being offsets from start?
 const sessionFieldDefinitions = {
-    displayName: "Session Name",
+    displayName: "Session name",
     start: {
         name: "Start",
         type: "time",
@@ -96,10 +100,18 @@ const sessionFieldDefinitions = {
     end: {
         name: "End",
         type: "time",
+        relativeTo: {
+            which: "start",
+            offsets: [30, 45, 60, 90, 120], // minutes
+        },
     },
     nbf: {
         name: "Opens",
         type: "time",
+        relativeTo: {
+            which: "start",
+            offsets: [-5, -10, -15, -30],   // minutes
+        },
     },
     roomName: "Room",
     modOnly: {
@@ -318,18 +330,26 @@ function createElem(type, attributes, properties) {
 }
 
 
+function setRelativeTime(field, relativeTo, offset) {
+    document.getElementById(field).value = document.getElementById(relativeTo).value;
+    document.getElementById(field).stepUp(offset);
+}
+
+
 function showSessionModal(sessionID = "") {
     const formElem = document.getElementById("session-form");
+    const formIdPrefix = "input-session-";
     formElem.innerHTML = "";
     for (let field in sessionFieldDefinitions) {
+        let followingLine = [];
         const display = typeof sessionFieldDefinitions[field] === "object" ? sessionFieldDefinitions[field].name : sessionFieldDefinitions[field];
         const type = typeof sessionFieldDefinitions[field] === "object" && sessionFieldDefinitions[field].type ? sessionFieldDefinitions[field].type : "text";
 
-        const label = createElem("label", {"for": "input-sessions-" + field}, {innerHTML: display});
+        const label = createElem("label", {"for": formIdPrefix + field}, {innerHTML: display});
         formElem.appendChild(label);
 
         if (type === "boolean") {
-            const select = createElem("select", {"id": "input-session-" + field, "name": field})
+            const select = createElem("select", {"id": formIdPrefix + field, "name": field})
             const boolOptions = {"Unspecified": "", "True": "true", "False": "false"};
             Object.entries(boolOptions).forEach(([name, value]) => {
                 const option = createElem("option", {"value": value}, {"text": name})
@@ -337,19 +357,37 @@ function showSessionModal(sessionID = "") {
             });
             formElem.appendChild(select);
         } else {
-            const input = createElem("input", {"id": "input-session-" + field, "name": field});
+            const input = createElem("input", {"id": formIdPrefix + field, "name": field});
             if (type === "time") {
                 input.onchange = sessionModalRenderDateTime;
                 input.onkeyup = sessionModalRenderDateTime;
                 input.setAttribute("type", "datetime-local");
+                if (sessionFieldDefinitions[field].relativeTo) {
+                    const relativeTo = sessionFieldDefinitions[field].relativeTo;
+                    const textContent = "    " + (relativeTo.offsets[0] > 0 ? "After" : "Before") + " " + relativeTo.which;
+                    followingLine.push(createElem("span", {class: "inset"}, {textContent}));
+
+                    const buttons = createElem("div");
+                    relativeTo.offsets.forEach((offset) => {
+                        const textContent = Math.abs(offset) + "m";
+                        const onclick = () => setRelativeTime(formIdPrefix + field, formIdPrefix + relativeTo.which, offset);
+                        buttons.appendChild(createElem("button", {}, {textContent, onclick}));
+                    });
+                    followingLine.push(buttons);
+
+                    followingLine.push(createElem("span"));
+                }
             } else {
                 input.setAttribute("type", type);
             }
             formElem.appendChild(input);
         }
 
-        const renderSpan = createElem("span", {"id": "input-session-" + field + "-render"});
+        const renderSpan = createElem("span", {"id": formIdPrefix + field + "-render"});
         formElem.appendChild(renderSpan);
+        if (followingLine.length) {
+            followingLine.forEach((elem) => formElem.appendChild(elem));
+        }
     }
 
     const saveButton = createElem("button", {}, {"onclick": sessionModalSave, "innerHTML": "Save"});
