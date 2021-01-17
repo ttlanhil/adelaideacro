@@ -295,15 +295,13 @@ function checkExpireUser(user) {
 
 function cleanUp() {
     // Expire any old user accounts
-    iterateUsers(checkExpireUser, includeUserData=true);
+    iterateUsers(checkExpireUser, true);
 
     listSessions().then((sessions) => {
-        const upcomingSessions = Object.keys(sessions);
-
         db.ref("users").once("value", (userDataRef) => {
             const userData = userDataRef.val();
             for (let userID in userData) {
-                admin.auth().getUser(userID).then((userRecord) => {
+                admin.auth().getUser(userID).then(() => {
                     // delete any sessionTokens not in upcomingSessions
                     for (let sessionID in userData[userID].sessionTokens) {
                         if (! (sessionID in sessions)) {
