@@ -234,7 +234,7 @@ var prevUserIDs = "";
 function postLoginCallback(user) {
     const currentTimestamp = (Date.now()/1000) - 60*60; // any session that starts in the future, or up to an hour ago
 
-    firebase.database().ref('sessions')/*.orderByChild("end").startAt(currentTimestamp)*/.on('value', (sessionsRef) => {
+    firebase.database().ref('sessions').orderByChild("end")/*.startAt(currentTimestamp)*/.on('value', (sessionsRef) => {
         const sessions = sessionsRef.val();
         const sessionIDs = Object.keys(sessions).toString();
         if (sessionIDs !== prevSessionIDs){
@@ -244,7 +244,7 @@ function postLoginCallback(user) {
         renderSessions(sessions);
     });
 
-    firebase.database().ref('users').on('value', (userDataRef) => {
+    firebase.database().ref('users').orderByChild("lastLogin").on('value', (userDataRef) => {
         const users = userDataRef.val();
         const userIDs = Object.keys(users).toString();
         if (userIDs !== prevUserIDs){
