@@ -114,7 +114,7 @@ header div.dropdown {
 
 header div.dropdown .inner {
     position: absolute;
-    display: block;
+    display: none;
     transition: 0.5s;
     opacity: 0;
     margin-left: -11px;
@@ -126,6 +126,7 @@ header div.dropdown .inner {
 
 header div.dropdown:hover .inner {
     opacity: 1;
+    display: block;
 }
 
 header div.dropdown .inner a {
