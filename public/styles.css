@@ -1,3 +1,5 @@
+/* TODO: on small/touch device, fold menu into a hamburger */
+
 body {
     margin: 0 auto;
     line-height: 1.2em;
@@ -160,6 +162,10 @@ section div {
     padding-right: 15px;
 }
 
+section div:not(:last-child) {
+    margin-bottom: 2.5em;
+}
+
 section.accordion div {
     padding-left: 0;
     padding-right: 0;
@@ -261,6 +267,7 @@ h1,  h2,  h3,  h4,  h5 {
 
 section {
     display: none;
+    margin-bottom: 3em;
 }
 
 section:target {
