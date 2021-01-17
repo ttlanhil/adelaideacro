@@ -86,7 +86,11 @@ function renderSessions() {
         if (isMod) {
             const openSessionButton = document.createElement("a");
             openSessionButton.href = "#";
-            openSessionButton.text = (session.open ? "Close" : "Open") + " Session";
+            if (session.open) {
+                openSessionButton.text = "Close Session (will kick remaining users)";
+            } else {
+                openSessionButton.text = "Open Session";
+            }
             openSessionButton.onclick = (function(sessionID, isOpen){
                 return () => {firebase.database().ref("/sessions/" + sessionID + "/open").set(isOpen);};
             })(sessionID, !session.open);
