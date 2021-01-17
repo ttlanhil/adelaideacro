@@ -31,7 +31,7 @@ function _param(request, name) {
     } else if (valLC === "true") {
         return true;
     }
-    const asNum = +val;
+    const asNum = Number(val);
     return asNum || val;
 }
 
