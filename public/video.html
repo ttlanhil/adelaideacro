@@ -25,6 +25,7 @@
 <script>
 var sessions = [];
 var userData;
+var inSession;
 
 function renderSessions() {
     setStatus();
@@ -36,44 +37,62 @@ function renderSessions() {
     for (let sessionID in sessions){
         const session = sessions[sessionID];
         const sessionEntry = document.createElement("div");
+        const sessionDescription = document.createElement("div");
+        const sessionIsOpen = isMod || (session && session.open);
         sessionEntry.className = "session-entry";
 
-        let meetingDisplay;
-        const canJoin = (isParticipant && sessionID in userData.sessionTokens);
+        let meetingDisplay = "";
+        const canJoin = (isParticipant && sessionIsOpen && sessionID in userData.sessionTokens);
+
+        if (inSession === sessionID && videoAPI) {
+            // update for a session we're currently participating in
+            if (!canJoin) {
+                videoAPI.executeCommand('hangup');
+            }
+        }
 
         if (canJoin) {
-            meetingDisplay = `<a href="#">${session.displayName}</a>`;
+            const joinSessionButton = document.createElement("a");
+            joinSessionButton.href = "#";
+            joinSessionButton.text = session.displayName;
+            joinSessionButton.onclick = (function(roomName, token){
+                return () => {inSession = sessionID; loadVideo(roomName, token);}
+            })(session.roomName, userData.sessionTokens[sessionID]);
+
+            sessionEntry.appendChild(joinSessionButton)
             if (session.modOnly) {
                 meetingDisplay += " (moderators only)";
             }
         } else if (session.modOnly) {
             continue;
         } else {
-            meetingDisplay = session.displayName;
+            meetingDisplay = session.displayName + "<br />";
         }
 
         if (session.start) {
             const startTime = new Date(session.start*1000);
             const openTime = new Date(session.nbf*1000);
-            meetingDisplay += `<br />${startTime.toLocaleDateString()} ${formatHHMM(startTime)}`;
+            meetingDisplay += `${startTime.toLocaleDateString()} ${formatHHMM(startTime)}`;
             if (session.end) {
                 const endTime = new Date(session.end*1000);
                 meetingDisplay += ` until ${formatHHMM(endTime)}`;
             }
-            meetingDisplay += `<br />Open to join from ${formatHHMM(openTime)}`
-            if (!isMod) {
-                meetingDisplay += " (entry will fail before then).";
-            }
+            meetingDisplay += `<br />Open to join from around ${formatHHMM(openTime)}`
         }
 
-        if (canJoin) {
-            // wrap in closure to prevent variables all pointing to last meeting
-            sessionEntry.onclick = (function(roomName, token){
-                return () => {loadVideo(roomName, token); return false;}
-            })(session.roomName, userData.sessionTokens[sessionID]);
+        sessionDescription.innerHTML += meetingDisplay + "<br/>";
+        sessionEntry.appendChild(sessionDescription);
+
+        if (isMod) {
+            const openSessionButton = document.createElement("a");
+            openSessionButton.href = "#";
+            openSessionButton.text = (session.open ? "Close" : "Open") + " Session";
+            openSessionButton.onclick = (function(sessionID, isOpen){
+                return () => {firebase.database().ref("/sessions/" + sessionID + "/open").set(isOpen);};
+            })(sessionID, !session.open);
+            sessionEntry.appendChild(openSessionButton);
         }
 
-        sessionEntry.innerHTML = meetingDisplay;
         document.getElementById("session-list").appendChild(sessionEntry);
     }
     if (document.getElementById("session-list").innerHTML.length <= 0){
@@ -113,6 +132,7 @@ var videoAPI;
 function hideVideo() {
     videoAPI && videoAPI.dispose();
     document.getElementById("video-container").style.zIndex = -1;
+    videoAPI = null;
 }
 
 function loadVideo(roomName, jwt) {

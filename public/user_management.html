@@ -145,6 +145,10 @@ function setParticipant(user, value) {
 }
 
 
+function optionButton(ID, ticked, functionName) {
+    return "<span class='clickable' onclick='" + functionName + "(\"" + ID + "\", " + (ticked ? "false" : "true") + ")'>" + (ticked ? "✔" : "✖") + "</span>";
+}
+
 function renderUsers(users) {
     setStatus();
     console.log("renderUsers", users);
@@ -152,10 +156,6 @@ function renderUsers(users) {
     let userList = "<table><tr>";
     userList += ["Name", "ID", "Last Login", "Participant", "Moderator"].map((name) => "<th>"+name+"</th>").join("");
     userList += "</tr>";
-
-    const optionButton = (userID, ticked, functionName) => {
-        return "<span class='clickable' onclick='" + functionName + "(\"" + userID + "\", " + (ticked ? "false" : "true") + ")'>" + (ticked ? "✔" : "✖") + "</span>";
-    }
 
     for (let userID in users){
         const user = users[userID];
@@ -180,12 +180,17 @@ function renderUsers(users) {
 }
 
 
+function setSessionOpen(sessionID, isOpen) {
+    firebase.database().ref("/sessions/" + sessionID + "/open").set(isOpen);
+}
+
+
 function renderSessions(sessions) {
     setStatus();
     console.log("renderSessions", sessions);
 
     let sessionList = "<table><tr>";
-    sessionList += ["Session Name", "ID", "Opens", "Start", "End", "modOnly", "Room"].map((name) => "<th>"+name+"</th>").join("");
+    sessionList += ["Session Name", "ID", "Opens", "Start", "End", "modOnly", "Room", "Open"].map((name) => "<th>"+name+"</th>").join("");
     sessionList += "</tr>";
 
     for (let sessionID in sessions){
@@ -217,6 +222,10 @@ function renderSessions(sessions) {
         if (session.roomName) {
             sessionList += session.roomName;
         }
+
+        sessionList += "</td><td>";
+        sessionList += optionButton(sessionID, session.open, "setSessionOpen");
+
         sessionList += "</td></tr>";
     }
 

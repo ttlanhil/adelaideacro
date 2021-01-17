@@ -4,7 +4,12 @@
         ".write": "false",
         "sessions": {
             ".read": "auth != null",
-            ".indexOn": "end"
+            ".indexOn": "end",
+            "$uid": {
+                "open": {
+                    ".write": "root.child('users').child(auth.uid).child('moderator').exists()",
+                }
+            }
         },
         "users": {
             ".read": "root.child('users').child(auth.uid).child('moderator').exists()",
