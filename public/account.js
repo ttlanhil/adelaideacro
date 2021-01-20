@@ -82,14 +82,22 @@ function updateName() {
 function postLogin(user) {
     document.getElementById("login-permissions").innerHTML = "";
     document.getElementById("page-details").style.display = "none";
+    let hasProviderData = false;
 
     let loggedInStr = ["You are logged in as <em>" + (user.displayName || "New User") + "</em>"];
     if (user.providerData && user.providerData[0]) {
         loggedInStr.push("(signed in via " + user.providerData[0].providerId + ")");
+        if (user.providerData[0].providerId.indexOf(".") >= 0) {
+            // if there's a period in provider name, it's facebook.com or google.com or similar which provide the facility to update name there
+            // if "password" or anonymous, then need to allow users to update name here
+            hasProviderData = true;
+        }
     }
     loggedInStr.push("<br/>");
-    loggedInStr.push("<a href='#' onclick='updateName(); return false;'>Update name</a>");
-    loggedInStr.push("|");
+    if (!hasProviderData){
+        loggedInStr.push("<a href='#' onclick='updateName(); return false;'>Update name</a>");
+        loggedInStr.push("|");
+    }
     loggedInStr.push("<a href='#' onclick='logout(); return false;'>Logout</a>");
     document.getElementById("login-details").innerHTML = loggedInStr.join(" ");
 
