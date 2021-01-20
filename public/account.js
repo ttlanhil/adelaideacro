@@ -25,7 +25,9 @@ function logout() {
 
 function saveName(user) {
     // Have to save each path individually due to access rules
-    firebase.database().ref("/users/" + user.uid + "/name").set(user.displayName);
+    if (user.displayName) {
+        firebase.database().ref("/users/" + user.uid + "/name").set(user.displayName);
+    }
     firebase.database().ref("/users/" + user.uid + "/lastLogin").set(firebase.database.ServerValue.TIMESTAMP);
 }
 
