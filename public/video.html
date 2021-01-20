@@ -23,12 +23,21 @@
 <script src='account.js' async></script>
 
 <script>
+// Don't indicate session open until after this many additional seconds
+// In case user's clock is out of sync
+// TODO: check if user's clock actually is far out, and bypass check?
+const nbfMargin = 10;
 var sessions = [];
 var userData;
 var inSession;
+var renderSessionsTimer;
 
 function renderSessions() {
     setStatus();
+    var timeUntilNextOpen;
+    if (renderSessionsTimer) {
+        clearTimeout(renderSessionsTimer);
+    }
 
     const isMod = (userData && userData.moderator);
     const isParticipant = isMod || (userData && userData.participant && userData.sessionTokens);
@@ -38,7 +47,11 @@ function renderSessions() {
         const session = sessions[sessionID];
         const sessionEntry = document.createElement("div");
         const sessionDescription = document.createElement("div");
-        const sessionIsOpen = isMod || (session && session.open);
+        const timeUntilOpen = (session.nbf + nbfMargin)*1000 - Date.now();
+        if ((!timeUntilNextOpen) || timeUntilOpen < timeUntilNextOpen) {
+            timeUntilNextOpen = timeUntilOpen;
+        }
+        const sessionIsOpen = isMod || (session && session.open && timeUntilOpen <= 0);
         sessionEntry.className = "session-entry";
 
         let meetingDisplay = "";
@@ -102,6 +115,10 @@ function renderSessions() {
         }
 
         document.getElementById("session-list").appendChild(sessionEntry);
+    }
+    if (timeUntilNextOpen > 0) {
+        console.log("timeUntilNextOpen", timeUntilNextOpen);
+        renderSessionsTimer = setTimeout(renderSessions, timeUntilNextOpen);
     }
     if (document.getElementById("session-list").innerHTML.length <= 0){
         document.getElementById("session-list").innerHTML = "No upcoming sessions yet - we'll announce them once they're available!";
