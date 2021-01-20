@@ -66,7 +66,7 @@ exports.updateSession = functions.https.onRequest((request, response) => {
         return response.status(400).send("sessionID not specified");
     }
     let args = {};
-    ["displayName", "start", "end", "modOnly", "roomName"].forEach((argName) => {
+    ["displayName", "start", "end", "nbf", "modOnly", "roomName"].forEach((argName) => {
         const argVal = _param(request, argName);
         if (argVal !== null) {
             args[argName] = argVal;
