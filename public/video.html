@@ -77,7 +77,11 @@ function renderSessions() {
                 const endTime = new Date(session.end*1000);
                 meetingDisplay += ` until ${formatHHMM(endTime)}`;
             }
-            meetingDisplay += `<br />Open to join from around ${formatHHMM(openTime)}`
+            if (sessionIsOpen){
+                meetingDisplay += `<br />Session is open to join`;
+            } else {
+                meetingDisplay += `<br />Will be open to join around ${formatHHMM(openTime)}`;
+            }
         }
 
         sessionDescription.innerHTML += meetingDisplay + "<br/>";
