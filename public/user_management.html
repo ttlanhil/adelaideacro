@@ -157,8 +157,9 @@ function renderUsers(users) {
     userList += ["Name", "ID", "Last Login", "Participant", "Moderator"].map((name) => "<th>"+name+"</th>").join("");
     userList += "</tr>";
 
-    for (let userID in users){
-        const user = users[userID];
+    for (let i = 0; i < users.length; ++i) {
+        const userID = users[i][0];
+        const user = users[i][1];
 
         userList += `<tr><td>${user.name}</td><td>${userID}</td>`;
 
@@ -193,8 +194,9 @@ function renderSessions(sessions) {
     sessionList += ["Session Name", "ID", "Opens", "Start", "End", "modOnly", "Room", "Open"].map((name) => "<th>"+name+"</th>").join("");
     sessionList += "</tr>";
 
-    for (let sessionID in sessions){
-        const session = sessions[sessionID];
+    for (let i = 0; i < sessions.length; ++i) {
+        const sessionID = sessions[i][0];
+        const session = sessions[i][1];
 
         sessionList += `<tr><td>${session.displayName}</td><td><a href="#" onclick="showSessionModal('${sessionID}'); return false;">${sessionID}</a></td>`;
 
@@ -243,9 +245,9 @@ var prevUserIDs = "";
 function postLoginCallback(user) {
     const currentTimestamp = (Date.now()/1000) - 60*60; // any session that starts in the future, or up to an hour ago
 
-    firebase.database().ref('sessions').orderByChild("end")/*.startAt(currentTimestamp)*/.on('value', (sessionsRef) => {
-        const sessions = sessionsRef.val();
-        const sessionIDs = Object.keys(sessions).toString();
+    firebase.database().ref('sessions')/*.orderByChild("end").startAt(currentTimestamp)*/.on('value', (sessionsRef) => {
+        const sessions = Object.entries(sessionsRef.val()).sort((a, b) => b[1].end - a[1].end);
+        const sessionIDs = sessions.map((a) => a[0]).sort().toString();
         if (sessionIDs !== prevSessionIDs){
             prevSessionIDs = sessionIDs;
             shield();
@@ -253,9 +255,9 @@ function postLoginCallback(user) {
         renderSessions(sessions);
     });
 
-    firebase.database().ref('users').orderByChild("lastLogin").on('value', (userDataRef) => {
-        const users = userDataRef.val();
-        const userIDs = Object.keys(users).toString();
+    firebase.database().ref('users').on('value', (userDataRef) => {
+        const users = Object.entries(userDataRef.val()).sort((a, b) => b[1].lastLogin - a[1].lastLogin);
+        const userIDs = users.map((a) => a[0]).sort().toString();
         if (userIDs !== prevUserIDs){
             prevUserIDs = userIDs;
             shield();
