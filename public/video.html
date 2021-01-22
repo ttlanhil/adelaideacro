@@ -121,7 +121,6 @@ function renderSessions() {
         document.getElementById("session-list").appendChild(sessionEntry);
     }
     if (timeUntilNextOpen > 0) {
-        console.log("timeUntilNextOpen", timeUntilNextOpen);
         renderSessionsTimer = setTimeout(renderSessions, timeUntilNextOpen);
     }
     if (document.getElementById("session-list").innerHTML.length <= 0){
