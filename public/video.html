@@ -108,9 +108,13 @@ function renderSessions() {
             } else {
                 openSessionButton.text = "Open Session";
             }
-            openSessionButton.onclick = (function(sessionID, isOpen){
-                return () => {firebase.database().ref("/sessions/" + sessionID + "/open").set(isOpen);};
-            })(sessionID, !session.open);
+            openSessionButton.onclick = (function(label, sessionID, isOpen){
+                return () => {
+                    if (confirm(label)) {
+                        firebase.database().ref("/sessions/" + sessionID + "/open").set(isOpen);
+                    }
+                };
+            })(openSessionButton.text, sessionID, !session.open);
             sessionEntry.appendChild(openSessionButton);
         }
 
