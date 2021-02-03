@@ -160,6 +160,7 @@ var videoAPI;
 function hideVideo() {
     videoAPI && videoAPI.dispose();
     document.getElementById("video-container").style.zIndex = -1;
+    document.exitFullscreen();
     videoAPI = null;
 }
 
@@ -199,7 +200,9 @@ function loadVideo(roomName, jwt) {
     // Init the iframe API with the domain you've set in Branding, or 8x8.vc if you don't have one yet
 //     const api = new JitsiMeetExternalAPI("adelaideacrobalance.com.au", initData);
     videoAPI = new JitsiMeetExternalAPI("8x8.vc", initData);
-    document.getElementById("video-container").style.zIndex = 100;
+    const videoContainer = document.getElementById("video-container");
+    videoContainer.style.zIndex = 100;
+    videoContainer.requestFullscreen();
 
     // TODO: likewise for auth failure, time failure, etc
     // TODO: allow escape/etc to close on failure
