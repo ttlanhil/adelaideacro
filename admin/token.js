@@ -17,7 +17,7 @@ const jwtKey = fs.readFileSync(settings.jwtKeyFile);
 
 
 function create(session, user) {
-    const isMod = user.moderator === "true";
+    const isMod = (user.moderator === "true" || user.moderator === true);
     // unless moderator, won't be able to join after scheduled end time
 
     const header = {
