@@ -300,6 +300,7 @@ function cleanUp() {
     listSessions().then((sessions) => {
         db.ref("users").once("value", (userDataRef) => {
             const userData = userDataRef.val();
+            sessions = sessions || [];
             for (let userID in userData) {
                 admin.auth().getUser(userID).then(() => {
                     // delete any sessionTokens not in upcomingSessions
