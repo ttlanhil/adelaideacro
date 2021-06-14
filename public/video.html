@@ -23,6 +23,24 @@
 <script src='account.js' async></script>
 
 <script>
+
+var entityMap = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+    '/': '&#x2F;',
+    '`': '&#x60;',
+    '=': '&#x3D;'
+};
+
+function escapeHtml (string) {
+    return String(string).replace(/[&<>"'`=\/]/g, function (s) {
+        return entityMap[s];
+    });
+}
+
 // Don't indicate session open until after this many additional seconds
 // In case user's clock is out of sync
 // TODO: check if user's clock actually is far out, and bypass check?
@@ -67,7 +85,7 @@ function renderSessions() {
         if (canJoin) {
             const joinSessionButton = document.createElement("a");
             joinSessionButton.href = "#";
-            joinSessionButton.text = session.displayName;
+            joinSessionButton.text = escapeHtml(session.displayName);
             joinSessionButton.onclick = (function(roomName, token){
                 return () => {inSession = sessionID; loadVideo(roomName, token);}
             })(session.roomName, userData.sessionTokens[sessionID]);
@@ -79,7 +97,7 @@ function renderSessions() {
         } else if (session.modOnly) {
             continue;
         } else {
-            meetingDisplay = session.displayName + "<br />";
+            meetingDisplay = escapeHtml(session.displayName) + "<br />";
         }
 
         if (session.start) {
