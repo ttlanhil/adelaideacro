@@ -15,7 +15,7 @@ const stretchSessionID = "-MQ5ymANs7HAbkVusdEr";
 // const end = start + 24*60*60;
 // userSessions.updateSession(testSessionID, {start, end});
 
-// userSessions.setModerator("qvFgAQhQQ5U3leY2YRX6L4YfR513", false);
+// userSessions.setModerator("qvFgAQhQQ5U3leY2YRX6L4YfR513");
 
 // userSessions.listSessions().then(console.log);
 
