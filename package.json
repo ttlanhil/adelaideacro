@@ -4,11 +4,11 @@
   "description": "AdelaideAcrobalance website",
   "main": "firebase.js",
   "dependencies": {
-    "firebase-admin": "^10.0.2",
-    "jsonwebtoken": "^8.5.1"
+    "firebase-admin": "^12.1.0",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
-    "eslint": "^8.12.0"
+    "eslint": "^9.2.0"
   },
   "scripts": {
     "lint": "./node_modules/.bin/eslint .",
